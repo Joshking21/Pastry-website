@@ -16,23 +16,23 @@ export const FaqSection: React.FC = () => {
   const faqs: FaqItem[] = [
     {
       q: "How do I place an order?",
-      a: `Ordering is super simple! Add items directly to your cart on this website, or use the party pack builder. When you click "Send Order on WhatsApp", it neatly organizes your full order, delivery address, and notes into a pre-written WhatsApp message. We reply immediately to confirm payment and dispatch time.`,
+      a: `Ordering is straightforward! Add items directly to your basket on this website, or use our interactive party pack builder. When you click "Send Order on WhatsApp", it neatly organizes your full order, delivery address, and notes into a pre-written WhatsApp message. We confirm and schedule your bake once bank transfer is verified.`,
     },
     {
       q: "How far ahead should I order?",
-      a: `For daily pastries and snacks (meat pies, doughnuts, chin chin), please provide at least ${siteConfig.orderNoticePastries}. For custom celebration cakes and large party packs (100+ pieces), we require ${siteConfig.orderNoticeCakes} to prepare fresh fillings, proof the dough, and execute intricate cake designs.`,
+      a: `For daily pastries and snacks, please provide at least ${siteConfig.orderNoticePastries}. For custom celebration cakes and large party packs, we require ${siteConfig.orderNoticeCakes} to prepare fresh fillings, proof the dough, and execute intricate cake designs.`,
     },
     {
       q: "Do you deliver, and what areas do you cover?",
-      a: `Yes, we deliver! We cover ${siteConfig.deliveryAreas}. We dispatch via trusted delivery riders within Jos (Rayfield, Bukuru, Old Airport, Terminus, Lamingo, etc.). Self-pickup from our kitchen is also readily available.`,
+      a: `Yes, we deliver! We cover: ${siteConfig.deliveryAreas}. Kitchen pickup is also available upon order confirmation.`,
     },
     {
       q: "How do I pay?",
-      a: "We accept fast direct bank transfers to our official bakery account. Once your WhatsApp order details are finalized, our account information is shared. Orders are queued for the oven once transfer confirmation is verified.",
+      a: "We accept direct bank transfers to our official bakery account. Once your WhatsApp order details are finalized, our payment details are shared. Orders are queued for the oven once transfer confirmation is verified.",
     },
     {
       q: "Can I customise a cake or pastry order?",
-      a: "Absolutely! Fill out our Custom Cake section with your occasion, flavour, guest count, and inspiration picture link, or message us directly on WhatsApp with any specific ingredient requirements or packaging preferences.",
+      a: "Absolutely! Fill out our Custom Cake section with your occasion, flavour, guest count, and inspiration picture link, or message us directly on WhatsApp with any specific requirements.",
     },
   ];
 
@@ -43,16 +43,16 @@ export const FaqSection: React.FC = () => {
         {/* Title */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-2">
-            <HelpCircle className="w-4 h-4 text-[#B7793F]" />
-            <span className="text-xs uppercase tracking-[0.25em] font-bold text-[#B7793F]">
+            <HelpCircle className="w-4 h-4 text-caramel" />
+            <span className="text-xs uppercase tracking-[0.25em] font-bold text-caramel">
               CLEAR ANSWERS
             </span>
           </div>
-          <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl text-[#3B2418] uppercase">
+          <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl text-heading uppercase">
             FREQUENTLY ASKED QUESTIONS
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-[#6E625A]">
-            Everything you need to know about placing an order, delivery notice, and payments.
+          <p className="mt-2 text-base text-muted">
+            Everything you need to know about placing an order, advance notice, and delivery.
           </p>
         </div>
 
@@ -63,19 +63,19 @@ export const FaqSection: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="bg-[#FAF6F0] rounded-2xl border border-[#E8DED1] overflow-hidden shadow-xs transition-colors hover:border-[#B7793F]/50"
+                className="bg-bg rounded-2xl border border-border overflow-hidden shadow-xs transition-colors hover:border-caramel/50"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer"
+                  className="w-full px-6 py-5 min-h-[44px] text-left flex items-center justify-between gap-4 cursor-pointer"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-heading text-lg sm:text-xl text-[#3B2418] tracking-wide">
+                  <span className="font-heading text-lg sm:text-xl text-heading tracking-wide">
                     {faq.q}
                   </span>
                   <div
-                    className={`w-8 h-8 rounded-full border border-[#3B2418]/20 flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                      isOpen ? "rotate-180 bg-[#A8324A] text-white border-[#A8324A]" : "text-[#3B2418]"
+                    className={`size-11 rounded-full border border-heading/20 flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                      isOpen ? "rotate-180 bg-accent text-white border-accent" : "text-heading"
                     }`}
                   >
                     <ChevronDown className="w-4 h-4" />
@@ -90,7 +90,7 @@ export const FaqSection: React.FC = () => {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                     >
-                      <div className="px-6 pb-6 pt-1 text-sm sm:text-base text-[#6E625A] leading-relaxed border-t border-[#E8DED1]/60">
+                      <div className="px-6 pb-6 pt-1 text-base text-muted leading-relaxed border-t border-border/60">
                         {faq.a}
                       </div>
                     </motion.div>

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useCart, formatNaira } from "@/context/CartContext";
 import { Check, ShoppingBag, Sparkles } from "lucide-react";
-import confetti from "canvas-confetti";
 
 interface PackSize {
   id: string;
@@ -42,7 +41,7 @@ export const PartyPackBuilder: React.FC = () => {
   const toggleItem = (itemId: string) => {
     setSelectedItems((prev) => {
       if (prev.includes(itemId)) {
-        if (prev.length === 1) return prev; // keep at least 1
+        if (prev.length === 1) return prev;
         return prev.filter((id) => id !== itemId);
       } else {
         return [...prev, itemId];
@@ -50,7 +49,6 @@ export const PartyPackBuilder: React.FC = () => {
     });
   };
 
-  // Calculate live price based on size + selected premium additions
   const extraCost = selectedItems.reduce((acc, id) => {
     const item = PACK_ITEMS.find((i) => i.id === id);
     return acc + (item ? item.extra * (selectedSize.pieces / 50) : 0);
@@ -72,36 +70,35 @@ export const PartyPackBuilder: React.FC = () => {
       options: `Items included: ${selectedNames}`,
     });
 
-    try {
+    import("canvas-confetti").then((mod) => {
+      const confetti = mod.default;
       confetti({
         particleCount: 40,
         spread: 60,
         origin: { y: 0.7 },
-        colors: ["#A8324A", "#B7793F", "#FAF6F0"],
+        colors: ["rgb(168, 50, 74)", "rgb(183, 121, 63)", "rgb(250, 246, 240)"],
       });
-    } catch {
-      // ignore
-    }
+    }).catch(() => {});
   };
 
   return (
-    <section id="party-packs" className="py-16 md:py-24 bg-[#F1EAE0]/50 border-t border-[#E8DED1]">
+    <section id="party-packs" className="py-16 md:py-24 bg-surface/50 border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Title */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-[#B7793F]" />
-            <span className="text-xs uppercase tracking-[0.25em] font-bold text-[#B7793F]">
+            <Sparkles className="w-4 h-4 text-caramel" />
+            <span className="text-xs uppercase tracking-[0.25em] font-bold text-caramel">
               INTERACTIVE BUILDER
             </span>
           </div>
-          <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl text-[#3B2418] uppercase">
+          <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl text-heading uppercase">
             BUILD YOUR PARTY PACK
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-[#6E625A]">
-            Planning a birthday, church event, or office meetup in Jos? Choose your pack size,
-            select your favourite small chops, and add it right to your order.
+          <p className="mt-3 text-base text-muted">
+            Planning a celebration, office gathering, or event? Choose your pack size,
+            select your favourite small chops, and add it right to your basket.
           </p>
         </div>
 
@@ -115,25 +112,26 @@ export const PartyPackBuilder: React.FC = () => {
                 alt="Small Chops Party Pack spread"
                 width={800}
                 height={800}
+                sizes="(max-width: 768px) 300px, 420px"
                 className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.2)]"
               />
             </div>
             <div className="mt-4 text-center">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#3B2418]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-heading">
                 {selectedSize.pieces} PIECE CELEBRATION TRAY
               </span>
-              <p className="text-xs text-[#6E625A] mt-1">
-                Delivered piping hot in insulated foil platters
+              <p className="text-base text-muted mt-1">
+                Delivered piping hot in insulated packaging
               </p>
             </div>
           </div>
 
           {/* Right Column: Interactive Selectors */}
-          <div className="lg:col-span-7 bg-[#FAF6F0] rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-[#E8DED1] shadow-lg">
+          <div className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-lg">
             
             {/* Step 1: Pack Size Selector */}
             <div className="mb-8">
-              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-[#3B2418] mb-3">
+              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
                 1. SELECT PACK SIZE
               </label>
               <div className="grid grid-cols-3 gap-3 sm:gap-4">
@@ -143,21 +141,21 @@ export const PartyPackBuilder: React.FC = () => {
                     <button
                       key={pack.id}
                       onClick={() => setSelectedSize(pack)}
-                      className={`relative p-3.5 sm:p-4 rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`relative p-3.5 sm:p-4 rounded-xl border text-center transition-all cursor-pointer min-h-[44px] ${
                         isSelected
-                          ? "border-[#A8324A] bg-[#A8324A]/5 shadow-xs"
-                          : "border-[#E8DED1] bg-[#F1EAE0]/40 hover:border-[#B7793F]"
+                          ? "border-accent bg-accent/5 shadow-xs"
+                          : "border-border bg-surface/40 hover:border-caramel"
                       }`}
                     >
                       {pack.popular && (
-                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#B7793F] text-white text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-caramel text-white text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full shadow-xs">
                           POPULAR
                         </span>
                       )}
-                      <span className="block font-heading text-lg sm:text-2xl text-[#3B2418]">
+                      <span className="block font-heading text-lg sm:text-2xl text-heading">
                         {pack.pieces} PCS
                       </span>
-                      <span className="block text-xs font-medium text-[#6E625A] mt-1">
+                      <span className="block text-xs font-medium text-muted mt-1">
                         From {formatNaira(pack.basePrice)}
                       </span>
                     </button>
@@ -168,7 +166,7 @@ export const PartyPackBuilder: React.FC = () => {
 
             {/* Step 2: Items checklist */}
             <div className="mb-8">
-              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-[#3B2418] mb-3">
+              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
                 2. CHOOSE YOUR CHOP SELECTION (TICK ALL YOU LIKE)
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -178,28 +176,28 @@ export const PartyPackBuilder: React.FC = () => {
                     <div
                       key={item.id}
                       onClick={() => toggleItem(item.id)}
-                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                         isChecked
-                          ? "border-[#B7793F] bg-[#FAF6F0] shadow-xs"
-                          : "border-[#E8DED1] bg-[#F1EAE0]/30 hover:border-[#E8DED1]"
+                          ? "border-caramel bg-bg shadow-xs"
+                          : "border-border bg-surface/30 hover:border-border"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
                             isChecked
-                              ? "bg-[#A8324A] border-[#A8324A] text-white"
-                              : "border-[#3B2418]/30 bg-white"
+                              ? "bg-accent border-accent text-white"
+                              : "border-heading/30 bg-white"
                           }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5" />}
                         </div>
-                        <span className="text-xs sm:text-sm font-medium text-[#2E2520]">
+                        <span className="text-xs sm:text-sm font-medium text-text">
                           {item.name}
                         </span>
                       </div>
                       {item.extra > 0 && (
-                        <span className="text-[11px] font-semibold text-[#B7793F]">
+                        <span className="text-[11px] font-semibold text-caramel">
                           +{formatNaira(item.extra * (selectedSize.pieces / 50))}
                         </span>
                       )}
@@ -210,19 +208,19 @@ export const PartyPackBuilder: React.FC = () => {
             </div>
 
             {/* Price Calculation & Add to order */}
-            <div className="pt-6 border-t border-[#E8DED1] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <span className="text-xs uppercase tracking-wider text-[#6E625A] block">
+                <span className="text-xs uppercase tracking-wider text-muted block">
                   Estimated Total for {selectedSize.pieces} Pieces
                 </span>
-                <span className="font-heading text-3xl sm:text-4xl text-[#3B2418]">
+                <span className="font-heading text-3xl sm:text-4xl text-heading">
                   {formatNaira(totalPrice)}
                 </span>
               </div>
 
               <button
                 onClick={handleAddPack}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#A8324A] hover:bg-[#8D253B] text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Add Pack to Order</span>

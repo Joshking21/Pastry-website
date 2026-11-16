@@ -1,55 +1,60 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { siteConfig } from "@/data/site";
+import { MENU_ITEMS } from "@/data/menu";
 import { FlourDust } from "@/components/FlourDust";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { motion } from "framer-motion";
 
 export const Hero: React.FC = () => {
+  const [isExiting, setIsExiting] = useState(false);
+  const heroMeatPie = MENU_ITEMS.find((item) => item.id === "meat-pie");
+
   const scrollToMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    const menuEl = document.getElementById("menu");
-    if (menuEl) {
-      menuEl.scrollIntoView({ behavior: "smooth" });
-    }
+    setIsExiting(true);
+    setTimeout(() => {
+      const menuEl = document.getElementById("menu");
+      if (menuEl) {
+        menuEl.scrollIntoView({ behavior: "smooth" });
+      }
+      setTimeout(() => setIsExiting(false), 500);
+    }, 250);
   };
 
   return (
-    <section className="relative overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24 lg:py-28 min-h-[82vh] flex items-center">
+    <section className="relative overflow-hidden pt-8 pb-16 md:pt-14 md:pb-24 lg:py-28 min-h-[82vh] flex items-center">
       {/* Background flour particles drifting */}
       <FlourDust />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
           
           {/* Left Column: Big condensed typography and calls to action */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 flex flex-col justify-center text-left"
+          <div
+            className={`lg:col-span-7 flex flex-col justify-center text-left transition-all duration-500 ease-out ${
+              isExiting ? "opacity-0 -translate-x-20" : "opacity-100 translate-x-0"
+            }`}
           >
             {/* Tagline pill */}
-            <div className="inline-flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-[#B7793F]" />
-              <span className="text-xs uppercase tracking-[0.25em] font-bold text-[#6E625A]">
-                FRESHLY BAKED IN JOS · PLATEAU STATE
+            <div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
+              <span className="w-2 h-2 rounded-full bg-caramel" />
+              <span className="text-xs uppercase tracking-[0.25em] font-bold text-muted">
+                {siteConfig.tagline}
               </span>
             </div>
 
-            {/* Giant condensed two-line headline */}
-            <h1 className="font-heading text-5xl sm:text-7xl md:text-8xl lg:text-[6.2rem] leading-[0.92] tracking-[0.03em] uppercase">
-              <span className="block text-[#3B2418]">FRESH FROM</span>
-              <span className="block text-[#B7793F] mt-1">JULIET&apos;S OVEN</span>
+            {/* Giant condensed two-line headline filling ~half viewport width on desktop */}
+            <h1 className="font-heading text-[clamp(3.5rem,8.5vw,8.5rem)] leading-[0.92] tracking-[0.03em] uppercase">
+              <span className="block text-heading">{siteConfig.heroHeadline[0]}</span>
+              <span className="block text-caramel mt-1">{siteConfig.heroHeadline[1]}</span>
             </h1>
 
             {/* Subtitle / Paragraph */}
-            <p className="mt-6 md:mt-7 text-base sm:text-lg text-[#2E2520]/90 max-w-xl font-normal leading-relaxed">
+            <p className="mt-5 md:mt-6 text-base sm:text-lg text-text max-w-xl font-normal leading-relaxed">
               Every golden pie, flaky sausage roll, and celebratory treat is hand-crafted
-              fresh from scratch in our Jos kitchen. No preservatives, no shortcuts—just pure,
-              comforting Nigerian pastry goodness.
+              fresh to order. Made with wholesome ingredients and baked to golden perfection.
             </p>
 
             {/* Actions: Underlined CTA link and WhatsApp pill button */}
@@ -57,9 +62,9 @@ export const Hero: React.FC = () => {
               <a
                 href="#menu"
                 onClick={scrollToMenu}
-                className="group inline-flex items-center gap-2.5 font-heading text-lg sm:text-xl text-[#3B2418] hover:text-[#A8324A] tracking-[0.14em] uppercase transition-colors"
+                className="group inline-flex items-center gap-2.5 font-heading text-lg sm:text-xl text-heading hover:text-accent tracking-[0.14em] uppercase transition-colors min-h-[44px]"
               >
-                <span className="border-b-2 border-[#3B2418] group-hover:border-[#A8324A] pb-0.5 transition-colors">
+                <span className="border-b-2 border-heading group-hover:border-accent pb-0.5 transition-colors">
                   SEE WHAT&apos;S BAKING
                 </span>
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -67,69 +72,52 @@ export const Hero: React.FC = () => {
 
               <a
                 href={`https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
-                  "Hello Juliet! I visited your website and would like to order fresh pastries 🧁"
+                  siteConfig.whatsappGreetings.hero
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#A8324A] hover:bg-[#8D253B] text-white font-medium text-sm sm:text-base tracking-wide transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm sm:text-base tracking-wide transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Order on WhatsApp</span>
               </a>
             </div>
+          </div>
 
-            {/* Trust badge under CTA */}
-            <div className="mt-8 pt-6 border-t border-[#E8DED1]/70 flex flex-wrap items-center gap-6 text-xs text-[#6E625A]">
-              <span className="flex items-center gap-1.5 font-medium">
-                <span className="text-[#A8324A]">✓</span> Same-day baking
-              </span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <span className="text-[#A8324A]">✓</span> Doorstep delivery across Jos
-              </span>
-              <span className="flex items-center gap-1.5 font-medium">
-                <span className="text-[#A8324A]">✓</span> Party & bulk discounts
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Right Column: Hero Product Cut-out */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-5 relative flex items-center justify-center"
+          {/* Right Column: Hero Product Cut-out that bleeds slightly off right edge on desktop */}
+          <div
+            className={`lg:col-span-5 relative flex items-center justify-center lg:justify-end lg:-mr-12 transition-all duration-500 ease-out ${
+              isExiting ? "opacity-0 translate-x-10" : "opacity-100 translate-x-0"
+            }`}
           >
-            {/* Soft radiant ambient glow behind pastry */}
-            <div className="absolute inset-0 -m-8 rounded-full bg-radial from-[#F1EAE0]/80 via-[#FAF6F0]/0 to-transparent blur-2xl pointer-events-none" />
-
-            <div className="relative w-full max-w-[480px] lg:max-w-none aspect-square flex items-center justify-center group">
+            <div className="relative w-full max-w-[500px] lg:max-w-[620px] aspect-square flex items-center justify-center group">
               {/* Product cutout */}
               <div className="relative w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                 <Image
                   src="/images/products/hero-meat-pie.png"
-                  alt="Golden Nigerian Meat Pie broken open showing beef, potato and carrot filling"
+                  alt="Golden Nigerian Meat Pie broken open showing minced beef, potato and carrot filling"
                   width={1400}
                   height={1400}
                   priority
+                  sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 620px"
                   className="w-full h-auto object-contain drop-shadow-[0_25px_30px_rgba(59,36,24,0.22)] select-none"
                 />
               </div>
 
-              {/* Floating feature pill badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="absolute -bottom-3 right-4 sm:right-8 bg-[#FAF6F0]/95 backdrop-blur-md border border-[#B7793F]/40 shadow-md px-4 py-2 rounded-full flex items-center gap-2"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#A8324A] animate-pulse" />
-                <span className="text-xs font-heading tracking-wider text-[#3B2418]">
-                  SIGNATURE BEEF &amp; POTATO PIE
-                </span>
-                <span className="text-xs font-semibold text-[#B7793F]">₦1,200</span>
-              </motion.div>
+              {/* Solid clean pill badge without glassmorphism */}
+              {heroMeatPie && (
+                <div className="absolute -bottom-2 right-4 sm:right-8 bg-bg border border-border shadow-md px-4 py-2 rounded-full flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-accent" />
+                  <span className="text-xs font-heading tracking-wider text-heading">
+                    {heroMeatPie.name.toUpperCase()}
+                  </span>
+                  <span className="text-xs font-semibold text-caramel">
+                    ₦{heroMeatPie.price.toLocaleString("en-NG")}
+                  </span>
+                </div>
+              )}
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>

@@ -15,7 +15,7 @@ interface CartContextType {
   items: CartItem[];
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number, openDrawer?: boolean) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -57,7 +57,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [items, isLoaded]);
 
-  const addItem = (item: Omit<CartItem, "quantity">, quantity: number = 1) => {
+  const addItem = (item: Omit<CartItem, "quantity">, quantity: number = 1, openDrawer: boolean = false) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
@@ -67,7 +67,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prev, { ...item, quantity }];
     });
-    setIsCartOpen(true);
+    if (openDrawer) {
+      setIsCartOpen(true);
+    }
   };
 
   const removeItem = (id: string) => {
@@ -132,3 +134,4 @@ export const useCart = () => {
 export function formatNaira(amount: number): string {
   return "₦" + amount.toLocaleString("en-NG");
 }
+

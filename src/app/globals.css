@@ -1,29 +1,34 @@
 @import "tailwindcss";
+@source "../..";
+@source "../../src";
+@source "../components";
+
+@theme {
+  --color-bg: #FAF6F0;
+  --color-surface: #F1EAE0;
+  --color-heading: #3B2418;
+  --color-caramel: #965C25;
+  --color-text: #2E2520;
+  --color-muted: #5A4E46;
+  --color-accent: #A8324A;
+  --color-accent-hover: #8D253B;
+  --color-border: #E8DED1;
+  --color-whatsapp: #25D366;
+  --color-whatsapp-hover: #20BD5A;
+  --font-heading: var(--font-heading), sans-serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+}
 
 :root {
   --bg: #FAF6F0;
   --surface: #F1EAE0;
   --heading: #3B2418;
-  --caramel: #B7793F;
+  --caramel: #965C25;
   --text: #2E2520;
-  --muted: #6E625A;
+  --muted: #5A4E46;
   --accent: #A8324A;
   --accent-hover: #8D253B;
   --border: #E8DED1;
-}
-
-@theme {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-heading: var(--heading);
-  --color-caramel: var(--caramel);
-  --color-text: var(--text);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-border: var(--border);
-  --font-heading: var(--font-heading), sans-serif;
-  --font-sans: var(--font-sans), system-ui, sans-serif;
 }
 
 html {
@@ -34,64 +39,43 @@ html {
 
 body {
   background-color: var(--bg);
-  background-image: url('/images/bg-texture.jpg');
-  background-repeat: repeat;
-  background-size: 1200px auto;
-  background-attachment: fixed;
   color: var(--text);
-  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
 }
 
-/* Custom Typography Helpers */
+/* Fixed full-screen background texture without janky background-attachment: fixed */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url('/images/bg-texture.jpg');
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 .font-heading {
   font-family: var(--font-heading);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-/* Subtle flour dust floating animation */
-@keyframes drift {
+@keyframes scaleIn {
   0% {
-    transform: translateY(0px) translateX(0px) rotate(0deg);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateY(-25px) translateX(15px) rotate(180deg);
-    opacity: 0.45;
+    transform: scale(0.75);
+    opacity: 0;
   }
   100% {
-    transform: translateY(-50px) translateX(-10px) rotate(360deg);
-    opacity: 0.1;
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-.animate-flour-drift {
-  animation: drift 14s ease-in-out infinite alternate;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #FAF6F0;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #D9CEBF;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #B7793F;
-}
-
-/* Focus styles */
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Reduced motion preference */

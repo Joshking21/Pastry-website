@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useCart, formatNaira } from "@/context/CartContext";
 import { siteConfig } from "@/data/site";
-import { X, Plus, Minus, Trash2, ShoppingBag, MessageCircle, Truck, Store } from "lucide-react";
+import { X, Plus, Minus, Trash2, ShoppingBag, MessageCircle, Truck, Store, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
@@ -26,8 +26,15 @@ export const CartDrawer: React.FC = () => {
   const [dateTimeNeeded, setDateTimeNeeded] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Close on Escape key
+  const [nameError, setNameError] = useState("");
+  const [addressError, setAddressError] = useState("");
+
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const addressInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Close on Escape key and restore body overflow
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsCartOpen(false);
     };
@@ -37,7 +44,7 @@ export const CartDrawer: React.FC = () => {
     }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = prevOverflow;
     };
   }, [isCartOpen, setIsCartOpen]);
 
@@ -46,17 +53,26 @@ export const CartDrawer: React.FC = () => {
 
     if (items.length === 0) return;
 
+    let hasError = false;
+    setNameError("");
+    setAddressError("");
+
     if (!customerName.trim()) {
-      alert("Please provide your name so Juliet knows who is ordering!");
-      return;
+      setNameError(`Please provide your name so ${siteConfig.ownerFirstName} knows who is ordering.`);
+      hasError = true;
+      nameInputRef.current?.focus();
     }
 
     if (orderType === "delivery" && !address.trim()) {
-      alert("Please provide your delivery address in Jos or beyond!");
-      return;
+      setAddressError(`Please provide your delivery address in ${siteConfig.city} or nationwide.`);
+      if (!hasError) {
+        addressInputRef.current?.focus();
+      }
+      hasError = true;
     }
 
-    // Format item lines
+    if (hasError) return;
+
     const itemLines = items
       .map(
         (i) =>
@@ -66,10 +82,12 @@ export const CartDrawer: React.FC = () => {
       )
       .join("\n");
 
-    const message = `Hello! I'd like to place an order 🧁\n\n${itemLines}\n\nTotal: ${formatNaira(
+    const message = `${siteConfig.whatsappGreetings.cartPrefix}\n\n${itemLines}\n\nTotal: ${formatNaira(
       totalPrice
     )}\nName: ${customerName}\n${
-      orderType === "delivery" ? `Delivery to: ${address}` : `Order Type: Self-Pickup at Rayfield Kitchen`
+      orderType === "delivery"
+        ? `Delivery to: ${address}`
+        : `Order Type: Self-Pickup (${siteConfig.address})`
     }\nNeeded: ${dateTimeNeeded || "As soon as fresh"}\n${
       notes ? `Notes: ${notes}` : ""
     }`;
@@ -79,7 +97,7 @@ export const CartDrawer: React.FC = () => {
         particleCount: 50,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#A8324A", "#B7793F", "#FAF6F0"],
+        colors: ["rgb(168, 50, 74)", "rgb(183, 121, 63)", "rgb(250, 246, 240)"],
       });
     } catch {
       // ignore
@@ -96,13 +114,13 @@ export const CartDrawer: React.FC = () => {
     <AnimatePresence>
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop */}
+          {/* Solid subtle backdrop without blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-[#3B2418]/35 backdrop-blur-xs cursor-pointer"
+            className="fixed inset-0 bg-heading/40 cursor-pointer"
           />
 
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
@@ -112,35 +130,30 @@ export const CartDrawer: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="w-screen max-w-md bg-[#FAF6F0] shadow-2xl border-l border-[#E8DED1] flex flex-col h-full overflow-hidden"
-              style={{
-                backgroundImage: "url('/images/bg-texture.jpg')",
-                backgroundRepeat: "repeat",
-                backgroundSize: "600px auto",
-              }}
+              className="w-screen max-w-md bg-bg shadow-2xl border-l border-border flex flex-col h-full overflow-hidden"
             >
               {/* Drawer Header */}
-              <div className="p-5 sm:p-6 border-b border-[#E8DED1] bg-[#FAF6F0]/90 backdrop-blur-xs flex items-center justify-between">
+              <div className="p-5 sm:p-6 border-b border-border bg-bg flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#A8324A]/10 flex items-center justify-center text-[#A8324A]">
+                  <div className="size-11 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
                     <ShoppingBag className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading text-2xl text-[#3B2418]">
+                    <h3 className="font-heading text-2xl text-heading">
                       YOUR BASKET ({totalCount})
                     </h3>
-                    <span className="text-[11px] text-[#6E625A] block -mt-1">
-                      Orders are confirmed and paid via WhatsApp
+                    <span className="text-[11px] text-muted block -mt-1">
+                      Orders are confirmed and arranged via WhatsApp
                     </span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="w-9 h-9 rounded-full border border-[#3B2418]/20 bg-[#FAF6F0] hover:bg-[#F1EAE0] text-[#3B2418] flex items-center justify-center transition-colors cursor-pointer"
+                  className="size-11 rounded-full border border-heading/20 bg-bg hover:bg-surface text-heading flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Close cart drawer"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -148,18 +161,18 @@ export const CartDrawer: React.FC = () => {
               <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-[#F1EAE0] flex items-center justify-center text-[#B7793F] mb-4">
+                    <div className="size-16 rounded-full bg-surface flex items-center justify-center text-caramel mb-4">
                       <ShoppingBag className="w-8 h-8 opacity-60" />
                     </div>
-                    <h4 className="font-heading text-2xl text-[#3B2418]">
+                    <h4 className="font-heading text-2xl text-heading">
                       YOUR BASKET IS EMPTY
                     </h4>
-                    <p className="text-xs text-[#6E625A] max-w-xs mt-1.5 leading-relaxed">
+                    <p className="text-sm text-muted max-w-xs mt-1.5 leading-relaxed">
                       Explore our flaky meat pies, party platters, and sweet treats to start your order.
                     </p>
                     <button
                       onClick={() => setIsCartOpen(false)}
-                      className="mt-6 px-6 py-2.5 rounded-full bg-[#3B2418] text-white text-xs font-semibold tracking-wider uppercase hover:bg-[#A8324A] transition-colors cursor-pointer"
+                      className="mt-6 px-6 min-h-[44px] rounded-full bg-heading text-white text-xs font-semibold tracking-wider uppercase hover:bg-accent transition-colors cursor-pointer flex items-center justify-center"
                     >
                       Browse Bakery Menu
                     </button>
@@ -170,10 +183,10 @@ export const CartDrawer: React.FC = () => {
                       {items.map((item) => (
                         <div
                           key={item.id}
-                          className="bg-[#FAF6F0] rounded-xl p-3.5 border border-[#E8DED1] shadow-xs flex items-center gap-3.5"
+                          className="bg-bg rounded-xl p-3.5 border border-border shadow-xs flex items-center gap-3.5"
                         >
                           {/* Item cutout thumbnail */}
-                          <div className="relative w-16 h-16 shrink-0 bg-[#F1EAE0]/50 rounded-lg p-1 flex items-center justify-center">
+                          <div className="relative w-16 h-16 shrink-0 bg-surface/50 rounded-lg p-1 flex items-center justify-center">
                             <Image
                               src={item.image}
                               alt={item.name}
@@ -185,44 +198,46 @@ export const CartDrawer: React.FC = () => {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-heading text-base sm:text-lg text-[#3B2418] truncate leading-tight">
+                            <h4 className="font-heading text-base sm:text-lg text-heading truncate leading-tight">
                               {item.name}
                             </h4>
                             {item.options && (
-                              <p className="text-[11px] text-[#6E625A] truncate mt-0.5">
+                              <p className="text-[11px] text-muted truncate mt-0.5">
                                 {item.options}
                               </p>
                             )}
-                            <div className="text-xs font-semibold text-[#B7793F] mt-1">
+                            <div className="text-xs font-semibold text-caramel mt-1">
                               {formatNaira(item.price * item.quantity)}
                             </div>
                           </div>
 
-                          {/* Quantity stepper + delete */}
+                          {/* Quantity stepper + delete with 44px tap targets */}
                           <div className="flex flex-col items-end gap-1.5 shrink-0">
                             <button
                               onClick={() => removeItem(item.id)}
-                              className="text-[#6E625A] hover:text-[#A8324A] transition-colors p-1"
+                              className="text-muted hover:text-accent transition-colors p-2 min-h-[36px] min-w-[36px] flex items-center justify-center"
                               aria-label="Remove item"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
 
-                            <div className="flex items-center gap-1.5 bg-[#F1EAE0] rounded-full px-1.5 py-0.5 border border-[#B7793F]/30">
+                            <div className="flex items-center gap-1.5 bg-surface rounded-full px-1.5 py-0.5 border border-border">
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="w-5 h-5 rounded-full bg-[#FAF6F0] text-[#3B2418] flex items-center justify-center text-xs cursor-pointer hover:bg-white"
+                                className="size-8 rounded-full bg-bg text-heading flex items-center justify-center text-xs cursor-pointer hover:bg-white"
+                                aria-label="Decrease item quantity"
                               >
-                                <Minus className="w-3 h-3" />
+                                <Minus className="w-3.5 h-3.5" />
                               </button>
-                              <span className="font-heading text-xs px-1 text-[#3B2418]">
+                              <span className="font-heading text-sm px-1.5 text-heading min-w-[1.2rem] text-center">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="w-5 h-5 rounded-full bg-[#A8324A] text-white flex items-center justify-center text-xs cursor-pointer hover:bg-[#8D253B]"
+                                className="size-8 rounded-full bg-accent text-white flex items-center justify-center text-xs cursor-pointer hover:bg-accent-hover"
+                                aria-label="Increase item quantity"
                               >
-                                <Plus className="w-3 h-3" />
+                                <Plus className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -231,8 +246,8 @@ export const CartDrawer: React.FC = () => {
                     </div>
 
                     {/* Order Details Form */}
-                    <div className="pt-4 border-t border-[#E8DED1] space-y-3.5">
-                      <span className="text-xs uppercase font-bold tracking-wider text-[#3B2418] block">
+                    <div className="pt-4 border-t border-border space-y-3.5">
+                      <span className="text-xs uppercase font-bold tracking-wider text-heading block">
                         ORDER &amp; DELIVERY DETAILS
                       </span>
 
@@ -241,87 +256,119 @@ export const CartDrawer: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setOrderType("delivery")}
-                          className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
+                          className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
                             orderType === "delivery"
-                              ? "border-[#A8324A] bg-[#A8324A]/10 text-[#A8324A]"
-                              : "border-[#E8DED1] bg-[#F1EAE0]/40 text-[#6E625A]"
+                              ? "border-accent bg-accent/10 text-accent"
+                              : "border-border bg-surface/40 text-muted"
                           }`}
                         >
                           <Truck className="w-4 h-4" />
-                          <span>Delivery in Jos</span>
+                          <span>Delivery</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setOrderType("pickup")}
-                          className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
+                          className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
                             orderType === "pickup"
-                              ? "border-[#A8324A] bg-[#A8324A]/10 text-[#A8324A]"
-                              : "border-[#E8DED1] bg-[#F1EAE0]/40 text-[#6E625A]"
+                              ? "border-accent bg-accent/10 text-accent"
+                              : "border-border bg-surface/40 text-muted"
                           }`}
                         >
                           <Store className="w-4 h-4" />
-                          <span>Self-Pickup</span>
+                          <span>Pickup</span>
                         </button>
                       </div>
 
-                      {/* Customer Name */}
+                      {/* Customer Name with inline error validation */}
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#3B2418] mb-1">
+                        <label htmlFor="customer-name" className="block text-[11px] font-bold uppercase tracking-wider text-heading mb-1">
                           YOUR NAME *
                         </label>
                         <input
+                          id="customer-name"
+                          ref={nameInputRef}
                           type="text"
                           required
                           value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
+                          onChange={(e) => {
+                            setCustomerName(e.target.value);
+                            if (nameError) setNameError("");
+                          }}
                           placeholder="e.g. Adaobi or Emmanuel"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DED1] bg-[#FAF6F0] text-xs text-[#2E2520] focus:border-[#A8324A] focus:outline-hidden"
+                          aria-invalid={!!nameError}
+                          aria-describedby={nameError ? "name-error-msg" : undefined}
+                          className={`w-full px-3.5 py-3 min-h-[44px] rounded-xl border bg-bg text-sm text-text focus:outline-hidden ${
+                            nameError ? "border-accent ring-1 ring-accent" : "border-border focus:border-accent"
+                          }`}
                         />
+                        {nameError && (
+                          <p id="name-error-msg" className="mt-1 text-xs text-accent flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{nameError}</span>
+                          </p>
+                        )}
                       </div>
 
-                      {/* Address (if delivery) */}
+                      {/* Address (if delivery) with inline error validation */}
                       {orderType === "delivery" && (
                         <div>
-                          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#3B2418] mb-1">
-                            DELIVERY ADDRESS (JOS / SURROUNDING) *
+                          <label htmlFor="customer-address" className="block text-[11px] font-bold uppercase tracking-wider text-heading mb-1">
+                            DELIVERY ADDRESS ({siteConfig.city.toUpperCase()} / NATIONWIDE) *
                           </label>
                           <input
+                            id="customer-address"
+                            ref={addressInputRef}
                             type="text"
                             required
                             value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            placeholder="e.g. 14 Rayfield Road, Opposite Golf Club, Jos"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DED1] bg-[#FAF6F0] text-xs text-[#2E2520] focus:border-[#A8324A] focus:outline-hidden"
+                            onChange={(e) => {
+                              setAddress(e.target.value);
+                              if (addressError) setAddressError("");
+                            }}
+                            placeholder={`e.g. Street Address in ${siteConfig.city}`}
+                            aria-invalid={!!addressError}
+                            aria-describedby={addressError ? "address-error-msg" : undefined}
+                            className={`w-full px-3.5 py-3 min-h-[44px] rounded-xl border bg-bg text-sm text-text focus:outline-hidden ${
+                              addressError ? "border-accent ring-1 ring-accent" : "border-border focus:border-accent"
+                            }`}
                           />
+                          {addressError && (
+                            <p id="address-error-msg" className="mt-1 text-xs text-accent flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" />
+                              <span>{addressError}</span>
+                            </p>
+                          )}
                         </div>
                       )}
 
                       {/* Date & Time Needed */}
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#3B2418] mb-1">
+                        <label htmlFor="customer-datetime" className="block text-[11px] font-bold uppercase tracking-wider text-heading mb-1">
                           DATE &amp; TIME NEEDED
                         </label>
                         <input
+                          id="customer-datetime"
                           type="text"
                           value={dateTimeNeeded}
                           onChange={(e) => setDateTimeNeeded(e.target.value)}
                           placeholder="e.g. Tomorrow by 1:00 PM"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DED1] bg-[#FAF6F0] text-xs text-[#2E2520] focus:border-[#A8324A] focus:outline-hidden"
+                          className="w-full px-3.5 py-3 min-h-[44px] rounded-xl border border-border bg-bg text-sm text-text focus:border-accent focus:outline-hidden"
                         />
                       </div>
 
                       {/* Notes */}
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#3B2418] mb-1">
+                        <label htmlFor="customer-notes" className="block text-[11px] font-bold uppercase tracking-wider text-heading mb-1">
                           SPECIAL INSTRUCTIONS / NOTES
                         </label>
                         <input
+                          id="customer-notes"
                           type="text"
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           placeholder="e.g. Extra pepper on gizzard, pack separately"
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DED1] bg-[#FAF6F0] text-xs text-[#2E2520] focus:border-[#A8324A] focus:outline-hidden"
+                          className="w-full px-3.5 py-3 min-h-[44px] rounded-xl border border-border bg-bg text-sm text-text focus:border-accent focus:outline-hidden"
                         />
                       </div>
                     </div>
@@ -331,12 +378,12 @@ export const CartDrawer: React.FC = () => {
 
               {/* Drawer Footer: Total & WhatsApp Order CTA */}
               {items.length > 0 && (
-                <div className="p-5 sm:p-6 border-t border-[#E8DED1] bg-[#F1EAE0]/70 backdrop-blur-xs space-y-4">
+                <div className="p-5 sm:p-6 border-t border-border bg-surface/70 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-heading text-lg text-[#3B2418]">ESTIMATED TOTAL</span>
+                    <span className="font-heading text-lg text-heading">ESTIMATED TOTAL</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-base font-light text-[#3B2418]">₦</span>
-                      <span className="text-3xl font-light text-[#3B2418]">
+                      <span className="text-base font-light text-heading">₦</span>
+                      <span className="text-3xl font-light text-heading">
                         {totalPrice.toLocaleString("en-NG")}
                       </span>
                     </div>
@@ -344,17 +391,17 @@ export const CartDrawer: React.FC = () => {
 
                   <button
                     onClick={handleSendWhatsApp}
-                    className="w-full py-4 rounded-full bg-[#A8324A] hover:bg-[#8D253B] text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                    className="w-full min-h-[48px] py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all cursor-pointer"
                   >
                     <MessageCircle className="w-5 h-5" />
                     <span>Send Order on WhatsApp</span>
                   </button>
 
-                  <div className="flex items-center justify-between text-[11px] text-[#6E625A] pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-muted pt-1">
                     <span>Payment verified via bank transfer</span>
                     <button
                       onClick={clearCart}
-                      className="hover:text-[#A8324A] transition-colors cursor-pointer"
+                      className="hover:text-accent transition-colors cursor-pointer min-h-[32px] flex items-center"
                     >
                       Clear Basket
                     </button>

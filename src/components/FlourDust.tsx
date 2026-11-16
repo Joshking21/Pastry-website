@@ -20,8 +20,12 @@ export const FlourDust: React.FC = () => {
   const isVisibleRef = useRef<boolean>(true);
 
   useEffect(() => {
-    // Check prefers-reduced-motion
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Check prefers-reduced-motion and small mobile screens
+    if (
+      window.innerWidth < 768 ||
+      "ontouchstart" in window ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       return;
     }
 
@@ -49,8 +53,8 @@ export const FlourDust: React.FC = () => {
     );
     observer.observe(canvas);
 
-    // Create 45 subtle flour dust particles
-    const particleCount = 45;
+    // Create 30 subtle flour dust particles
+    const particleCount = 30;
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
@@ -59,45 +63,56 @@ export const FlourDust: React.FC = () => {
         x,
         originalX: x,
         y: Math.random() * height,
-        radius: Math.random() * 2.2 + 0.6,
-        alpha: Math.random() * 0.45 + 0.15,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: Math.random() * 0.4 + 0.15,
-        swaySpeed: Math.random() * 0.02 + 0.005,
-        swayDist: Math.random() * 15 + 5,
+        radius: Math.random() * 2.0 + 0.6,
+        alpha: Math.random() * 0.4 + 0.15,
+        speedX: (Math.random() - 0.5) * 0.25,
+        speedY: Math.random() * 0.35 + 0.12,
+        swaySpeed: Math.random() * 0.015 + 0.005,
+        swayDist: Math.random() * 12 + 4,
       });
     }
 
     let frame = 0;
-    const render = () => {
+    let lastTime = performance.now();
+    const frameInterval = 1000 / 30; // 30 FPS throttle to preserve main thread
+
+    const render = (currentTime: number) => {
       if (isVisibleRef.current) {
-        ctx.clearRect(0, 0, width, height);
-        frame++;
+        const delta = currentTime - lastTime;
+        if (delta >= frameInterval) {
+          lastTime = currentTime - (delta % frameInterval);
+          ctx.clearRect(0, 0, width, height);
+          frame++;
 
-        for (let i = 0; i < particleCount; i++) {
-          const p = particles[i];
-          p.y -= p.speedY; // Drift upwards slowly like fine flour dust
-          p.x = p.originalX + Math.sin(frame * p.swaySpeed + i) * p.swayDist;
+          for (let i = 0; i < particleCount; i++) {
+            const p = particles[i];
+            p.y -= p.speedY; // Drift upwards slowly like fine flour dust
+            p.x = p.originalX + Math.sin(frame * p.swaySpeed + i) * p.swayDist;
 
-          // Wrap around
-          if (p.y < -10) {
-            p.y = height + 10;
-            p.originalX = Math.random() * width;
-            p.x = p.originalX;
+            // Wrap around
+            if (p.y < -10) {
+              p.y = height + 10;
+              p.originalX = Math.random() * width;
+              p.x = p.originalX;
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 252, 245, ${p.alpha})`;
+            ctx.fill();
           }
-
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 252, 245, ${p.alpha})`;
-          ctx.fill();
         }
       }
       animFrameRef.current = requestAnimationFrame(render);
     };
 
-    render();
+    // Delay start slightly to allow LCP paint
+    const timer = setTimeout(() => {
+      animFrameRef.current = requestAnimationFrame(render);
+    }, 300);
 
     return () => {
+      clearTimeout(timer);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       window.removeEventListener("resize", onResize);
       observer.disconnect();
@@ -112,3 +127,4 @@ export const FlourDust: React.FC = () => {
     />
   );
 };
+

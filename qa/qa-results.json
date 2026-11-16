@@ -1,0 +1,31 @@
+{
+  "functional": {
+    "seo": {
+      "title": "Ifeyinwa Pastries | Fresh Pastries & Small Chops in Jos, Nigeria",
+      "metaDesc": "Authentic Nigerian pastries, flaky pies, small chops party packs, and celebration cakes in Jos, Plateau State. Freshly baked to order.",
+      "ogImage": "https://ifeyinwapastries.com/images/og-image.jpg",
+      "jsonLdType": "Bakery",
+      "jsonLdName": "Ifeyinwa Pastries"
+    },
+    "scrollWidthAt360": 360,
+    "orderWhatsAppUrl": "https://wa.me/2348130993731?text=Hello!%20I'd%20like%20to%20place%20an%20order%20%F0%9F%A7%81%0A%0A%E2%80%A2%201%20%C3%97%20Golden%20Meat%20Pie%3A%20%E2%82%A61%2C200%0A%0ATotal%3A%20%E2%82%A61%2C200%0AName%3A%20Test%20Customer%0ADelivery%20to%3A%20123%20State%20Secretariate%2C%20Jos%0ANeeded%3A%20As%20soon%20as%20fresh%0A",
+    "decodedOrderMessage": "Hello! I'd like to place an order 🧁\n\n• 1 × Golden Meat Pie: ₦1,200\n\nTotal: ₦1,200\nName: Test Customer\nDelivery to: 123 State Secretariate, Jos\nNeeded: As soon as fresh\n",
+    "cakeWhatsAppUrl": "https://wa.me/2348130993731?text=Hello%20Juliet!%20%F0%9F%8E%82%20I%20would%20like%20to%20request%20a%20custom%20cake%3A%0A%0A%E2%80%A2%20Occasion%3A%20Birthday%0A%E2%80%A2%20Date%20Needed%3A%202026-11-23%0A%E2%80%A2%20Guest%20Count%3A%2010%20-%2020%20guests%0A%E2%80%A2%20Preferred%20Flavour%3A%20Vanilla%20Bean%20%26%20Red%20Velvet%0A%E2%80%A2%20Design%20Notes%3A%202-tier%20vanilla%20sponge%20cake%20with%20floral%20buttercream%0A%0A%0APlease%20let%20me%20know%20your%20availability%20and%20pricing!",
+    "decodedCakeMessage": "Hello Juliet! 🎂 I would like to request a custom cake:\n\n• Occasion: Birthday\n• Date Needed: 2026-11-23\n• Guest Count: 10 - 20 guests\n• Preferred Flavour: Vanilla Bean & Red Velvet\n• Design Notes: 2-tier vanilla sponge cake with floral buttercream\n\n\nPlease let me know your availability and pricing!"
+  },
+  "images": [
+    {
+      "url": "bg-texture.jpg",
+      "status": 200
+    }
+  ],
+  "consoleErrors": [],
+  "consoleWarnings": [],
+  "tapTargetFailures": [],
+  "bodyFontSizeFailures": [],
+  "viewports": [
+    "360x800",
+    "768x1024",
+    "1440x900"
+  ]
+}
