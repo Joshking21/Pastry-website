@@ -1,7 +1,4 @@
-"use client";
-
 import React, { useEffect, useRef } from "react";
-import Image from "next/image";
 import { MenuItem } from "@/data/menu";
 import { useCart } from "@/context/CartContext";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
@@ -104,13 +101,16 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               className="relative w-full max-w-[420px] aspect-square flex items-center justify-center z-10"
               transition={{ type: "spring", damping: 26, stiffness: 280 }}
             >
-              <Image
+              <img
                 src={product.image}
                 alt={product.name}
                 width={800}
                 height={800}
+                loading="eager"
                 className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)] select-none"
-                priority
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/products/hero-meat-pie.png";
+                }}
               />
             </motion.div>
 
@@ -123,12 +123,17 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                 transition={{ duration: 0.4, delay: 0.15 }}
                 className="relative -mt-16 sm:-mt-20 ml-16 w-full max-w-[340px] aspect-square flex items-center justify-center z-20"
               >
-                <Image
+                <img
                   src={product.detailImage}
                   alt={`${product.name} sliced view showing filling`}
                   width={700}
                   height={700}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.22)] select-none"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
                 />
               </motion.div>
             )}
@@ -205,13 +210,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 
             {/* Bottom Actions: Large thin-weight price + quantity stepper + Add pill */}
             <div className="mt-10 pt-6 border-t border-border flex items-center justify-between gap-6">
-              {/* Thin weight Naira Price with smaller ₦ */}
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-light text-heading">₦</span>
-                <span className="text-4xl lg:text-5xl font-light tracking-tight text-heading">
-                  {product.price.toLocaleString("en-NG")}
-                </span>
-              </div>
+              {/* Thin weight Naira Price (rendered as one string in one font per Job 2.5) */}
+              <span className="font-heading text-4xl lg:text-5xl font-light tracking-tight text-heading">
+                ₦{product.price.toLocaleString("en-NG")}
+              </span>
 
               {/* Add pill or 44px stepper */}
               {currentQty > 0 ? (
@@ -235,7 +237,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                   </button>
                 </div>
               ) : (
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
                   onClick={() =>
                     addItem({
                       id: product.id,
@@ -248,7 +251,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Order</span>
-                </button>
+                </motion.button>
               )}
             </div>
 
@@ -283,23 +286,25 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
           {/* Mobile Image */}
           <div className="p-6 flex flex-col items-center justify-center">
             <div className="relative w-full max-w-[280px] aspect-square flex items-center justify-center">
-              <Image
+              <img
                 src={product.image}
                 alt={product.name}
                 width={500}
                 height={500}
+                loading="eager"
                 className="w-full h-auto object-contain drop-shadow-[0_15px_20px_rgba(59,36,24,0.2)]"
-                priority
               />
             </div>
 
             {product.detailImage && product.detailImage !== product.image && (
               <div className="relative -mt-12 ml-10 w-full max-w-[220px] aspect-square flex items-center justify-center">
-                <Image
+                <img
                   src={product.detailImage}
                   alt={`${product.name} sliced view`}
                   width={400}
                   height={400}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto object-contain drop-shadow-[0_15px_20px_rgba(59,36,24,0.2)]"
                 />
               </div>
@@ -350,12 +355,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 
         {/* Sticky Mobile Bottom Bar with price and 44px Add button / stepper */}
         <div className="sticky bottom-0 z-20 p-4 bg-surface border-t border-border flex items-center justify-between">
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-light text-heading">₦</span>
-            <span className="text-3xl font-light text-heading">
-              {product.price.toLocaleString("en-NG")}
-            </span>
-          </div>
+          <span className="font-heading text-3xl font-light text-heading">
+            ₦{product.price.toLocaleString("en-NG")}
+          </span>
 
           {currentQty > 0 ? (
             <div className="flex items-center gap-2 bg-bg rounded-full p-1 border border-border">
@@ -378,7 +380,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               </button>
             </div>
           ) : (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               onClick={() =>
                 addItem({
                   id: product.id,
@@ -391,7 +394,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Add to Order</span>
-            </button>
+            </motion.button>
           )}
         </div>
       </motion.div>

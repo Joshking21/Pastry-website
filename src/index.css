@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@source "../..";
-@source "../../src";
-@source "../components";
 
 @theme {
   --color-bg: #FAF6F0;
@@ -15,8 +12,8 @@
   --color-border: #E8DED1;
   --color-whatsapp: #25D366;
   --color-whatsapp-hover: #20BD5A;
-  --font-heading: var(--font-heading), sans-serif;
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-heading: "Bebas Neue", cursive, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
 :root {
@@ -29,12 +26,15 @@
   --accent: #A8324A;
   --accent-hover: #8D253B;
   --border: #E8DED1;
+  --font-heading: "Bebas Neue", cursive, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
 html {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -63,19 +63,9 @@ body::before {
   text-transform: uppercase;
 }
 
-@keyframes scaleIn {
-  0% {
-    transform: scale(0.75);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Section scroll-margin to avoid header clipping (Job 2.1) */
+section[id] {
+  scroll-margin-top: 96px;
 }
 
 /* Reduced motion preference */

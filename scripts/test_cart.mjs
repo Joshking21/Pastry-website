@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 async function testCart() {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
+  await page.goto(process.env.BASE_URL || "http://localhost:5174", { waitUntil: "networkidle" });
   
   const menu = page.locator("#menu");
   await menu.scrollIntoViewIfNeeded();

@@ -1,4 +1,4 @@
-// NOTE: Prices and product specifications are placeholders for the owner to confirm.
+// Product catalog and pricing configuration.
 // All business details and images are configured here.
 
 export type Category = "All" | "Pastries" | "Small Chops" | "Cakes" | "Snacks & Treats";

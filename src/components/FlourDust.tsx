@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef } from "react";
 
 interface Particle {
@@ -127,4 +125,3 @@ export const FlourDust: React.FC = () => {
     />
   );
 };
-

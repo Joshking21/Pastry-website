@@ -1,7 +1,4 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { X, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -87,7 +84,6 @@ export const GallerySection: React.FC = () => {
   return (
     <section id="gallery" className="py-16 md:py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Title */}
         <div className="text-center max-w-xl mx-auto mb-12">
           <span className="text-xs font-bold uppercase tracking-[0.25em] text-caramel">
@@ -107,23 +103,27 @@ export const GallerySection: React.FC = () => {
             <div
               key={idx}
               onClick={() => setActiveIdx(idx)}
-              className={`relative rounded-2xl overflow-hidden group cursor-pointer border border-border bg-bg shadow-sm hover:shadow-lg transition-all ${
+              className={`relative rounded-2xl overflow-hidden group cursor-pointer border border-border bg-bg shadow-xs hover:shadow-lg transition-all ${
                 img.span || ""
               }`}
             >
-              <Image
+              <img
                 src={img.src}
                 alt={img.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/products/meat-pie.png";
+                }}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 contrast-[1.02] brightness-[0.98]"
               />
-              
-              {/* Overlay with info - Solid gradient without blur */}
+
+              {/* Overlay with info */}
               <div className="absolute inset-0 bg-gradient-to-t from-heading/85 via-heading/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-heading text-xl sm:text-2xl">{img.title}</h3>
-                    <p className="text-base text-white/90 mt-0.5">{img.subtitle}</p>
+                    <p className="text-sm text-white/90 mt-0.5">{img.subtitle}</p>
                   </div>
                   <div className="size-11 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                     <ZoomIn className="w-5 h-5 text-white" />
@@ -133,10 +133,9 @@ export const GallerySection: React.FC = () => {
             </div>
           ))}
         </div>
-
       </div>
 
-      {/* Lightbox Modal (Clean solid overlay without glassmorphism) */}
+      {/* Lightbox Modal */}
       <AnimatePresence>
         {activeIdx !== null && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
@@ -154,43 +153,45 @@ export const GallerySection: React.FC = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-4xl max-h-[85vh] w-full z-10 bg-bg rounded-2xl overflow-hidden border border-border shadow-2xl flex flex-col"
             >
-              <button
+              <motion.button
+                whileTap={{ scale: 0.92 }}
                 onClick={() => setActiveIdx(null)}
-                className="absolute top-4 right-4 z-20 size-11 rounded-full bg-heading/60 hover:bg-heading/80 text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="absolute top-4 right-4 z-20 size-11 rounded-full bg-heading/70 hover:bg-heading/90 text-white flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Close image lightbox"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </motion.button>
 
               {/* Prev / Next controls */}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.92 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   prevImage();
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-heading/60 hover:bg-heading/80 text-white flex items-center justify-center cursor-pointer"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-heading/70 hover:bg-heading/90 text-white flex items-center justify-center cursor-pointer"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-6 h-6" />
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.92 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   nextImage();
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-heading/60 hover:bg-heading/80 text-white flex items-center justify-center cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-heading/70 hover:bg-heading/90 text-white flex items-center justify-center cursor-pointer"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-6 h-6" />
-              </button>
+              </motion.button>
 
-              <div className="relative w-full aspect-[4/3] max-h-[70vh]">
-                <Image
+              <div className="relative w-full aspect-[4/3] max-h-[70vh] flex items-center justify-center bg-black/10">
+                <img
                   src={GALLERY_IMAGES[activeIdx].src}
                   alt={GALLERY_IMAGES[activeIdx].title}
-                  fill
-                  className="object-contain bg-black/5"
+                  className="w-full h-full object-contain contrast-[1.02] brightness-[0.98]"
                 />
               </div>
 

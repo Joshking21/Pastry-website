@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 async function testCake() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
+  await page.goto(process.env.BASE_URL || "http://localhost:5174", { waitUntil: "networkidle" });
 
   await page.evaluate(() => {
     window.__lastUrl = null;

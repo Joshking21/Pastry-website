@@ -3,7 +3,7 @@
     "seo": {
       "title": "Ifeyinwa Pastries | Fresh Pastries & Small Chops in Jos, Nigeria",
       "metaDesc": "Authentic Nigerian pastries, flaky pies, small chops party packs, and celebration cakes in Jos, Plateau State. Freshly baked to order.",
-      "ogImage": "https://ifeyinwapastries.com/images/og-image.jpg",
+      "ogImage": "/images/og-image.jpg",
       "jsonLdType": "Bakery",
       "jsonLdName": "Ifeyinwa Pastries"
     },
@@ -17,12 +17,105 @@
     {
       "url": "bg-texture.jpg",
       "status": 200
+    },
+    {
+      "url": "products/hero-meat-pie.png",
+      "status": 200
+    },
+    {
+      "url": "products/meat-pie.png",
+      "status": 200
+    },
+    {
+      "url": "products/chicken-pie.png",
+      "status": 200
+    },
+    {
+      "url": "products/sausage-roll.png",
+      "status": 200
+    },
+    {
+      "url": "products/fish-roll.png",
+      "status": 200
+    },
+    {
+      "url": "products/egg-roll.png",
+      "status": 200
+    },
+    {
+      "url": "products/doughnuts.png",
+      "status": 200
+    },
+    {
+      "url": "products/small-chops.png",
+      "status": 200
+    },
+    {
+      "url": "products/celebration-cake.png",
+      "status": 200
     }
   ],
   "consoleErrors": [],
   "consoleWarnings": [],
-  "tapTargetFailures": [],
-  "bodyFontSizeFailures": [],
+  "tapTargetFailures": [
+    {
+      "tag": "A",
+      "text": "IFEYINWA PASTRIES",
+      "ariaLabel": null,
+      "width": 130,
+      "height": 28
+    }
+  ],
+  "bodyFontSizeFailures": [
+    {
+      "text": "Rolled to delicate perfection ",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "Golden, bubbling meat pies coo",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "Silky buttercream flowers and ",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "Kraft boxes tied with ribbon f",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "Puff-puff, crispy samosas & sp",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "Freshly swirled buttercream cu",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-sm text-white/90 mt-0.5"
+    },
+    {
+      "text": "© 2026 Ifeyinwa Pastries. All ",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-muted"
+    },
+    {
+      "text": "Freshly baked with\nin Jos, Nig",
+      "fontSize": 14,
+      "tag": "P",
+      "className": "text-muted flex items-center justify-center gap-1.5"
+    }
+  ],
   "viewports": [
     "360x800",
     "768x1024",

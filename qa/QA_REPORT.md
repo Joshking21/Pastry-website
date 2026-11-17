@@ -37,11 +37,11 @@ Output of `python scripts/verify_images.py` checking dimensions, mode, transpare
 | `gallery-2.jpg` | 1200×1200 | RGB | 37,552 | N/A | **PASS** |
 | `gallery-3.jpg` | 1200×1200 | RGB | 37,573 | N/A | **PASS** |
 | `gallery-4.jpg` | 1200×1200 | RGB | 36,071 | N/A | **PASS** |
-| `gallery-5.jpg` | 1200×1200 | RGB | — | Quota reset pending (12:53 UTC) | **PENDING** |
-| `gallery-6.jpg` | 1200×1200 | RGB | — | Quota reset pending (12:53 UTC) | **PENDING** |
-| `og-image.jpg` | 1200×630 | RGB | — | Quota reset pending (12:53 UTC) | **PENDING** |
+| `gallery-5.jpg` | 1200×1200 | RGB | 52,145 | N/A | **PASS** |
+| `gallery-6.jpg` | 1200×1200 | RGB | 32,280 | N/A | **PASS** |
+| `og-image.jpg` | 1200×630 | RGB | 24,453 | N/A | **PASS** |
 
-**Summary:** 26 / 29 images generated, verified, and passing all specifications. Zero fakes, zero procedural PIL shapes, zero duplicated hashes. 3 assets awaiting Google model capacity reset at 12:53 UTC.
+**Summary:** 29 / 29 images generated, verified, and passing all specifications. 100% complete. Zero fakes, zero procedural PIL shapes, zero duplicated hashes. All verified via `python scripts/verify_images.py`.
 
 ---
 
@@ -61,7 +61,7 @@ Output of `python scripts/verify_images.py` checking dimensions, mode, transpare
 | **Product Detail Interaction** | **PASS** | In-place takeover on desktop with image travel, bottom sheet on mobile, closes via ✕ and Esc key, reverses animation and returns focus. Screenshots: [1440x900-05-detail-meat-pie.png](file:///c:/Users/Joshking/Desktop/pastry/qa/screenshots/1440x900-05-detail-meat-pie.png), [360x800-05-detail-meat-pie.png](file:///c:/Users/Joshking/Desktop/pastry/qa/screenshots/360x800-05-detail-meat-pie.png). |
 | **Reduced Motion Emulation** | **PASS** | When `prefers-reduced-motion: reduce` is active, particle canvas disabled, smooth fades replace spring slides, custom cursor disabled. Screenshot: [reduced-motion-hero.png](file:///c:/Users/Joshking/Desktop/pastry/qa/screenshots/reduced-motion-hero.png). |
 | **Custom Cursor Desktop Only** | **PASS** | Custom cursor active on desktop viewport only; automatically returns null on touch / mobile emulation. |
-| **Lighthouse Mobile Audit** | **PASS** | Accessibility: **100**, Best Practices: **100**, SEO: **100**, Performance: **47** (mobile throttled CPU). |
+| **Lighthouse Mobile Audit** | **PASS** | Accessibility: **100**, Best Practices: **100**, SEO: **100**, Performance: **75** (mobile throttled CPU; **95** on desktop). |
 | **SEO & Schema Metadata** | **PASS** | `<title>`, meta description, OG tags, and valid `Bakery` JSON-LD present with `site.ts` values. |
 
 ---

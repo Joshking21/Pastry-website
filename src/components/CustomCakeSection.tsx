@@ -1,9 +1,7 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useRef } from "react";
 import { siteConfig } from "@/data/site";
 import { Cake, MessageCircle, AlertCircle } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export const CustomCakeSection: React.FC = () => {
   const [occasion, setOccasion] = useState("Birthday");
@@ -12,6 +10,13 @@ export const CustomCakeSection: React.FC = () => {
   const [flavour, setFlavour] = useState("Vanilla Bean & Red Velvet");
   const [referenceLink, setReferenceLink] = useState("");
   const [designNotes, setDesignNotes] = useState("");
+
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [-25, 25]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +39,11 @@ Please let me know your availability and pricing!`;
   };
 
   return (
-    <section id="custom-cakes" className="py-16 md:py-24 relative overflow-hidden">
+    <section
+      id="custom-cakes"
+      ref={sectionRef}
+      className="py-16 md:py-24 relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
@@ -54,7 +63,7 @@ Please let me know your availability and pricing!`;
               is custom designed and baked with quality ingredients.
             </p>
 
-            {/* Notice Alert from Section 0 */}
+            {/* Advance Order Notice Alert */}
             <div className="mt-6 p-4 rounded-xl bg-bg border border-caramel/40 flex items-start gap-3 shadow-xs">
               <AlertCircle className="w-5 h-5 text-caramel shrink-0 mt-0.5" />
               <div className="text-xs text-text">
@@ -65,17 +74,36 @@ Please let me know your availability and pricing!`;
               </div>
             </div>
 
-            {/* Visual Cake Cutout */}
-            <div className="mt-8 relative w-full max-w-[360px] aspect-square mx-auto flex items-center justify-center">
-              <Image
-                src="/images/products/celebration-cake.png"
-                alt="Two-tier celebration cake with floral accents"
-                width={700}
-                height={700}
-                sizes="(max-width: 768px) 280px, 360px"
-                className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)]"
-              />
-            </div>
+            {/* Visual Cake Cutout with parallax and float (Job 3 & 4.2) */}
+            <motion.div
+              style={{ y: parallaxY }}
+              className="mt-8 relative w-full max-w-[360px] aspect-square mx-auto flex items-center justify-center"
+            >
+              <motion.div
+                animate={{
+                  y: [-5, 5, -5],
+                }}
+                transition={{
+                  duration: 5.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="w-full h-full flex items-center justify-center"
+              >
+                <img
+                  src="/images/products/celebration-cake.png"
+                  alt="Two-tier celebration cake with floral accents"
+                  width={700}
+                  height={700}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)] select-none"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/images/products/hero-meat-pie.png";
+                  }}
+                />
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* Right Column: Custom Request Form */}
@@ -92,7 +120,7 @@ Please let me know your availability and pricing!`;
                     id="cake-occasion"
                     value={occasion}
                     onChange={(e) => setOccasion(e.target.value)}
-                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                   >
                     <option value="Birthday">Birthday Celebration</option>
                     <option value="Wedding">Wedding / Traditional Marriage</option>
@@ -114,7 +142,7 @@ Please let me know your availability and pricing!`;
                     required
                     value={dateNeeded}
                     onChange={(e) => setDateNeeded(e.target.value)}
-                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                   />
                 </div>
               </div>
@@ -129,7 +157,7 @@ Please let me know your availability and pricing!`;
                     id="cake-guests"
                     value={guestCount}
                     onChange={(e) => setGuestCount(e.target.value)}
-                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                   >
                     <option value="4 - 8 guests (Mini)">4 - 8 guests (6-inch Mini)</option>
                     <option value="10 - 20 guests (Standard)">10 - 20 guests (8-inch)</option>
@@ -148,7 +176,7 @@ Please let me know your availability and pricing!`;
                     id="cake-flavour"
                     value={flavour}
                     onChange={(e) => setFlavour(e.target.value)}
-                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                    className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                   >
                     <option value="Vanilla Bean & Buttercream">Classic Vanilla Bean</option>
                     <option value="Rich Red Velvet with Cream Cheese">Velvety Red Velvet</option>
@@ -170,7 +198,7 @@ Please let me know your availability and pricing!`;
                   value={designNotes}
                   onChange={(e) => setDesignNotes(e.target.value)}
                   placeholder="e.g. Sage green & champagne gold theme, fresh flowers on top"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                 />
               </div>
 
@@ -185,17 +213,18 @@ Please let me know your availability and pricing!`;
                   value={referenceLink}
                   onChange={(e) => setReferenceLink(e.target.value)}
                   placeholder="https://instagram.com/p/... or Pinterest pin link"
-                  className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:outline-hidden transition-colors"
+                  className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
                 />
               </div>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 type="submit"
                 className="w-full inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Send Cake Request on WhatsApp</span>
-              </button>
+              </motion.button>
             </form>
           </div>
 

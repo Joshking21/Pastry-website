@@ -1,5 +1,4 @@
 import React from "react";
-import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { TrustStrip } from "@/components/TrustStrip";
@@ -14,30 +13,26 @@ import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { CustomCursor } from "@/components/CustomCursor";
 
-export default function Home() {
+export default function App() {
   return (
-    <CartProvider>
-      <CustomCursor />
-      <div className="relative min-h-screen flex flex-col justify-between">
-        <Navbar />
-        <main className="flex-1">
-          <Hero />
-          <TrustStrip />
-          <MenuSection />
-          <PartyPackBuilder />
-          <CustomCakeSection />
-          <AboutSection />
-          <GallerySection />
-          <ReviewsSection />
-          <FaqSection />
-          <ContactSection />
-        </main>
-        <Footer />
-        <CartDrawer />
-        <FloatingWhatsApp />
-      </div>
-    </CartProvider>
+    <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
+      <Navbar />
+      <main className="flex-1">
+        <Hero />
+        <TrustStrip />
+        <MenuSection />
+        <PartyPackBuilder />
+        <CustomCakeSection />
+        <AboutSection />
+        <GallerySection />
+        <ReviewsSection />
+        <FaqSection />
+        <ContactSection />
+      </main>
+      <Footer />
+      <CartDrawer />
+      <FloatingWhatsApp />
+    </div>
   );
 }

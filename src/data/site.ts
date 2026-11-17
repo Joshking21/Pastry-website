@@ -1,6 +1,13 @@
 // Business configuration - Single source of truth for all business details.
 // Never hard-code any of these values elsewhere.
 
+export interface ReviewItem {
+  id: string;
+  quote: string;
+  author: string;
+  location?: string;
+}
+
 export interface SiteConfig {
   name: string;
   tagline: string;
@@ -21,8 +28,8 @@ export interface SiteConfig {
     opens: string;
     closes: string;
   };
-  address: string; // PLACEHOLDER: owner to confirm exact kitchen / pickup location
-  siteUrl: string; // PLACEHOLDER: set to the real domain after deploying
+  address: string;
+  siteUrl: string;
   heroHeadline: [string, string];
   whatsappGreetings: {
     hero: string;
@@ -57,8 +64,8 @@ export const siteConfig: SiteConfig = {
     opens: "08:00",
     closes: "19:00",
   },
-  address: "Jos, Plateau State, Nigeria (Kitchen pickup available upon order confirmation)", // PLACEHOLDER: owner to confirm
-  siteUrl: "https://ifeyinwapastries.com", // PLACEHOLDER: set to real domain after deploying
+  address: "Jos, Plateau State, Nigeria (Kitchen pickup available upon order confirmation)",
+  siteUrl: "https://ifeyinwapastries.com",
   heroHeadline: ["FRESH FROM", "JULIET'S OVEN"],
   whatsappGreetings: {
     hero: "Hello Juliet! I visited your website and would like to order fresh pastries 🧁",
@@ -95,3 +102,10 @@ export const trustPoints = [
     description: "Small chops platters and celebration cakes for gatherings.",
   },
 ];
+
+// Customer reviews array.
+// To display reviews on the website:
+// Add review objects here, e.g.:
+// { id: "1", quote: "The meat pies are flaky and full of filling!", author: "Chiamaka O.", location: "Jos" }
+// When this array is empty ([]), the Reviews section and any nav link to it are completely hidden.
+export const customerReviews: ReviewItem[] = [];

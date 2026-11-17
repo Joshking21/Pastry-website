@@ -1,16 +1,14 @@
-"use client";
-
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { MENU_ITEMS, CATEGORIES, Category, MenuItem } from "@/data/menu";
 import { useCart } from "@/context/CartContext";
 import { ProductDetail } from "@/components/ProductDetail";
-import { ChevronLeft, ChevronRight, Plus, Minus, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Minus, ShoppingBag, Check } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 export const MenuSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const { addItem, getItemQuantity, updateQuantity } = useCart();
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const activeTriggerRef = useRef<HTMLElement | null>(null);
@@ -92,6 +90,19 @@ export const MenuSection: React.FC = () => {
     setSelectedProduct(item);
   };
 
+  const handleAdd = (item: MenuItem) => {
+    addItem({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+    });
+    setJustAddedId(item.id);
+    setTimeout(() => {
+      setJustAddedId((curr) => (curr === item.id ? null : curr));
+    }, 1200);
+  };
+
   return (
     <section id="menu" className="py-16 md:py-24 relative overflow-hidden">
       <LayoutGroup>
@@ -110,26 +121,29 @@ export const MenuSection: React.FC = () => {
               and order effortlessly on WhatsApp.
             </p>
 
-            {/* Category Tabs: Centered uppercase letter-spaced links */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 border-b border-border pb-3">
+            {/* Category Tabs: Centered uppercase letter-spaced links with layoutId */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-6 border-b border-border pb-3">
               {CATEGORIES.map((cat) => {
                 const isActive = selectedCategory === cat;
                 return (
                   <button
                     key={cat}
+                    role="tab"
+                    aria-selected={isActive}
                     onClick={() => {
                       setSelectedCategory(cat);
                       setSelectedProduct(null);
                     }}
-                    className={`relative pb-2 text-xs sm:text-sm font-semibold tracking-[0.16em] uppercase transition-colors cursor-pointer min-h-[44px] min-w-[44px] px-3 inline-flex items-center justify-center ${
+                    className={`relative pb-2 text-xs sm:text-sm font-semibold tracking-[0.16em] uppercase transition-colors cursor-pointer min-h-[44px] min-w-[44px] px-3.5 inline-flex items-center justify-center ${
                       isActive ? "text-accent" : "text-muted hover:text-heading"
                     }`}
                   >
-                    {cat}
+                    <span>{cat}</span>
                     {isActive && (
                       <motion.div
                         layoutId="activeCategoryIndicator"
                         className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-accent rounded-full"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
                   </button>
@@ -182,35 +196,39 @@ export const MenuSection: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Carousel Track: 3 cards desktop, 2 tablet, 1 mobile with peeking edge */}
-                <AnimatePresence mode="wait">
+                {/* Carousel Track: 3 cards desktop, 2 tablet, 1 mobile with snap */}
+                <AnimatePresence mode="popLayout">
                   <motion.div
                     key={selectedCategory}
-                    initial={{ opacity: 0, x: 80 }}
+                    initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -80 }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    exit={{ opacity: 0, x: -40 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                     ref={carouselRef}
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUpOrLeave}
                     onMouseLeave={onMouseUpOrLeave}
-                    className="flex gap-6 sm:gap-8 overflow-x-auto pb-10 pt-4 snap-x snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none [&::-webkit-scrollbar]:hidden"
+                    className="flex gap-6 sm:gap-8 overflow-x-auto pb-8 pt-4 snap-x snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none [&::-webkit-scrollbar]:hidden"
                     style={{ scrollbarWidth: "none", overflowX: "auto" }}
                   >
                     {filteredItems.map((item, idx) => {
                       const qty = getItemQuantity(item.id);
+                      const isAdded = justAddedId === item.id;
 
                       return (
-                        <div
+                        <motion.div
                           key={item.id}
                           data-card
-                          className="snap-start shrink-0 w-[82vw] sm:w-[calc(50%-16px)] lg:w-[calc(33.333%-22px)] flex flex-col justify-between group"
-                          data-cursor-hover
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.04 }}
+                          whileHover={{ y: -4 }}
+                          className="snap-start shrink-0 w-[84vw] sm:w-[calc(50%-16px)] lg:w-[calc(33.333%-22px)] flex flex-col justify-between group transition-shadow p-2"
                         >
                           <div>
                             {/* Product Name sitting ABOVE the image */}
-                            <div className="min-h-[82px] flex flex-col justify-end relative z-10">
+                            <div className="min-h-[76px] flex flex-col justify-end relative z-10">
                               {item.tag && (
                                 <div className="mb-1">
                                   <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-caramel text-caramel inline-block">
@@ -223,28 +241,32 @@ export const MenuSection: React.FC = () => {
                                 onClick={(e) => handleCardClick(item, e.currentTarget)}
                                 className="text-left group/title cursor-pointer w-full min-h-[44px] flex items-center"
                               >
-                                <h3 className="font-heading text-[clamp(2rem,3.2vw,3rem)] text-heading leading-[0.93] tracking-[0.03em] uppercase group-hover/title:text-accent transition-colors">
+                                <h3 className="font-heading text-[clamp(2rem,3.2vw,2.8rem)] text-heading leading-[0.93] tracking-[0.03em] uppercase group-hover/title:text-accent transition-colors">
                                   {item.name}
                                 </h3>
                               </button>
                             </div>
 
-                            {/* Product Cut-out image visibly overlapping bottom third of the title */}
+                            {/* Product Cut-out image visibly overlapping bottom third of title */}
                             <div
                               onClick={(e) => handleCardClick(item, e.currentTarget)}
-                              className="relative -mt-6 sm:-mt-8 w-full aspect-square flex items-center justify-center cursor-pointer transition-transform duration-500 group-hover:scale-105 z-20"
+                              className="relative -mt-6 sm:-mt-8 w-full aspect-square flex items-center justify-center cursor-pointer transition-transform duration-500 group-hover:scale-105 group-hover:rotate-1 z-20"
                             >
                               <motion.div
                                 layoutId={`product-image-${item.id}`}
                                 className="w-full h-full flex items-center justify-center"
                               >
-                                <Image
+                                <img
                                   src={item.image}
                                   alt={item.name}
                                   width={600}
                                   height={600}
-                                  sizes="(max-width: 640px) 80vw, (max-width: 1024px) 45vw, 320px"
-                                  className="w-full h-auto max-h-[300px] object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)] select-none pointer-events-none"
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="w-full h-auto max-h-[290px] object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)] select-none pointer-events-none"
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLImageElement).src = "/images/products/hero-meat-pie.png";
+                                  }}
                                 />
                               </motion.div>
                             </div>
@@ -257,15 +279,12 @@ export const MenuSection: React.FC = () => {
 
                           {/* Price and Pill Add Button (Floating without box/border line) */}
                           <div className="mt-6 pt-2 flex items-center justify-between">
-                            {/* Thin weight Naira price with smaller ₦ */}
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-base font-light text-heading">₦</span>
-                              <span className="text-3xl font-light tracking-tight text-heading">
-                                {item.price.toLocaleString("en-NG")}
-                              </span>
-                            </div>
+                            {/* Thin weight Naira price in one string and font (Job 2.5) */}
+                            <span className="font-heading text-3xl font-light tracking-tight text-heading">
+                              ₦{item.price.toLocaleString("en-NG")}
+                            </span>
 
-                            {/* Button / 44px Stepper */}
+                            {/* Button / 44px Stepper with ✓ morph (Job 4.2) */}
                             {qty > 0 ? (
                               <div className="flex items-center gap-2 bg-surface rounded-full p-1 border border-border shadow-xs">
                                 <button
@@ -287,23 +306,28 @@ export const MenuSection: React.FC = () => {
                                 </button>
                               </div>
                             ) : (
-                              <button
-                                onClick={() =>
-                                  addItem({
-                                    id: item.id,
-                                    name: item.name,
-                                    price: item.price,
-                                    image: item.image,
-                                  })
-                                }
-                                className="inline-flex items-center justify-center gap-1.5 px-6 min-h-[44px] min-w-[72px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-xs tracking-wider uppercase transition-all shadow-xs hover:shadow-md active:scale-95 cursor-pointer"
+                              <motion.button
+                                whileTap={{ scale: 0.97 }}
+                                onClick={() => handleAdd(item)}
+                                className={`inline-flex items-center justify-center gap-1.5 px-6 min-h-[44px] min-w-[76px] rounded-full text-white font-medium text-xs tracking-wider uppercase transition-all shadow-xs hover:shadow-md cursor-pointer ${
+                                  isAdded ? "bg-whatsapp" : "bg-accent hover:bg-accent-hover"
+                                }`}
                               >
-                                <ShoppingBag className="w-4 h-4" />
-                                <span>Add</span>
-                              </button>
+                                {isAdded ? (
+                                  <>
+                                    <Check className="w-4 h-4" />
+                                    <span>Added</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShoppingBag className="w-4 h-4" />
+                                    <span>Add</span>
+                                  </>
+                                )}
+                              </motion.button>
                             )}
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </motion.div>

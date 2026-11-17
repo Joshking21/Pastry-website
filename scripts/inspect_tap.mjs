@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 async function main() {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 360, height: 800 } });
-  await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
+  await page.goto(process.env.BASE_URL || "http://localhost:5174", { waitUntil: "networkidle" });
   
   const fails = await page.evaluate(() => {
     const interactive = Array.from(document.querySelectorAll("button, a, [role=button]"));

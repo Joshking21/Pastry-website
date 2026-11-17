@@ -1,5 +1,3 @@
-"use client";
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface CartItem {
@@ -40,8 +38,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         setItems(JSON.parse(stored));
       }
-    } catch (e) {
-      console.warn("Could not load cart from localStorage", e);
+    } catch {
+      // Fallback cleanly if localStorage is restricted
     } finally {
       setIsLoaded(true);
     }
@@ -52,8 +50,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isLoaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.warn("Could not save cart to localStorage", e);
+    } catch {
+      // Fallback cleanly if localStorage is restricted
     }
   }, [items, isLoaded]);
 
@@ -134,4 +132,3 @@ export const useCart = () => {
 export function formatNaira(amount: number): string {
   return "₦" + amount.toLocaleString("en-NG");
 }
-

@@ -1,8 +1,7 @@
-"use client";
-
 import React from "react";
 import { siteConfig } from "@/data/site";
 import { Flame, Clock, Truck, PartyPopper } from "lucide-react";
+import { motion } from "framer-motion";
 
 export const TrustStrip: React.FC = () => {
   const points = [
@@ -28,32 +27,45 @@ export const TrustStrip: React.FC = () => {
     },
   ];
 
+  // Repeat items for seamless marquee
+  const marqueeItems = [...points, ...points, ...points];
+
   return (
-    <section className="border-y border-border bg-surface/50 py-8 md:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {points.map((pt, idx) => {
+    <section className="border-y border-border bg-surface/50 py-6 sm:py-7 overflow-hidden relative">
+      {/* Slow infinite marquee (Job 4.2) */}
+      <div className="flex select-none">
+        <motion.div
+          animate={{ x: ["0%", "-33.333%"] }}
+          transition={{
+            repeat: Infinity,
+            duration: 28,
+            ease: "linear",
+          }}
+          className="flex items-center gap-8 sm:gap-14 shrink-0 pr-8 sm:pr-14"
+        >
+          {marqueeItems.map((pt, idx) => {
             const Icon = pt.icon;
             return (
               <div
                 key={idx}
-                className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 group"
+                className="flex items-center gap-3.5 shrink-0 group"
               >
-                <div className="w-11 h-11 rounded-full bg-bg border border-border flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105">
-                  <Icon className="w-5 h-5 text-caramel" />
+                <div className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105">
+                  <Icon className="w-4 h-4 text-caramel" />
                 </div>
-                <div>
-                  <h2 className="font-heading text-base sm:text-lg text-heading tracking-wider leading-snug">
+                <div className="whitespace-nowrap">
+                  <span className="font-heading text-base sm:text-lg text-heading tracking-wider leading-snug block">
                     {pt.title}
-                  </h2>
-                  <p className="text-base text-muted mt-0.5 leading-relaxed">
+                  </span>
+                  <span className="text-xs sm:text-sm text-muted mt-0.5 leading-relaxed block">
                     {pt.desc}
-                  </p>
+                  </span>
                 </div>
+                <span className="text-caramel/40 ml-4 font-heading text-xs">✦</span>
               </div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

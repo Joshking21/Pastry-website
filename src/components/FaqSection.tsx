@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { siteConfig } from "@/data/site";
 import { ChevronDown, HelpCircle } from "lucide-react";
@@ -39,7 +37,6 @@ export const FaqSection: React.FC = () => {
   return (
     <section id="faq" className="py-16 md:py-24 relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Title */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-2">
@@ -66,9 +63,11 @@ export const FaqSection: React.FC = () => {
                 className="bg-bg rounded-2xl border border-border overflow-hidden shadow-xs transition-colors hover:border-caramel/50"
               >
                 <button
+                  type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full px-6 py-5 min-h-[44px] text-left flex items-center justify-between gap-4 cursor-pointer"
+                  className="w-full px-6 py-5 min-h-[48px] text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden"
                   aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${idx}`}
                 >
                   <span className="font-heading text-lg sm:text-xl text-heading tracking-wide">
                     {faq.q}
@@ -82,13 +81,14 @@ export const FaqSection: React.FC = () => {
                   </div>
                 </button>
 
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`faq-answer-${idx}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <div className="px-6 pb-6 pt-1 text-base text-muted leading-relaxed border-t border-border/60">
                         {faq.a}
@@ -100,7 +100,6 @@ export const FaqSection: React.FC = () => {
             );
           })}
         </div>
-
       </div>
     </section>
   );

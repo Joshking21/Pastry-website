@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import fs from "fs";
 import path from "path";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || "http://localhost:5174";
 const SCREENSHOTS_DIR = path.resolve("qa/screenshots");
 
 fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });

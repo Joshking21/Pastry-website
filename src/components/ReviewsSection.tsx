@@ -1,26 +1,12 @@
-"use client";
-
 import React from "react";
 import { MessageSquareQuote } from "lucide-react";
+import { customerReviews } from "@/data/site";
 
 export const ReviewsSection: React.FC = () => {
-  const reviews = [
-    {
-      name: "Customer Name",
-      location: "Customer location",
-      text: "Customer review goes here, replace with a real one. The owner can paste authentic feedback received via WhatsApp or Instagram right here.",
-    },
-    {
-      name: "Customer Name",
-      location: "Customer location",
-      text: "Customer review goes here, replace with a real one. Share what regular customers say about the meat pie crust and timely party pack deliveries.",
-    },
-    {
-      name: "Customer Name",
-      location: "Customer location",
-      text: "Customer review goes here, replace with a real one. Perfect place to showcase a happy celebration cake testimonial.",
-    },
-  ];
+  // If there are no reviews provided yet, do not render this section (per Job 2.5)
+  if (!customerReviews || customerReviews.length === 0) {
+    return null;
+  }
 
   return (
     <section id="reviews" className="py-16 md:py-24 bg-surface/30 border-t border-border">
@@ -35,28 +21,29 @@ export const ReviewsSection: React.FC = () => {
             WHAT OUR CUSTOMERS SAY
           </h2>
           <p className="mt-2 text-base text-muted">
-            Real feedback from pastry lovers. (Owner: replace placeholder quotes below with real feedback).
+            Feedback from pastry lovers across Jos and beyond.
           </p>
         </div>
 
-        {/* 3 Testimonial Cards without star ratings */}
+        {/* Testimonial Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          {reviews.map((rev, idx) => (
+          {customerReviews.map((rev) => (
             <div
-              key={idx}
+              key={rev.id}
               className="bg-bg rounded-2xl p-6 sm:p-8 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
             >
               <div>
                 <MessageSquareQuote className="w-8 h-8 text-caramel/50 mb-3" />
-
                 <p className="text-base text-text italic leading-relaxed">
-                  &ldquo;{rev.text}&rdquo;
+                  &ldquo;{rev.quote}&rdquo;
                 </p>
               </div>
 
               <div className="mt-6 pt-4 border-t border-border">
-                <h3 className="font-heading text-lg text-heading">{rev.name}</h3>
-                <span className="text-xs text-muted block mt-0.5">{rev.location}</span>
+                <h3 className="font-heading text-lg text-heading">{rev.author}</h3>
+                {rev.location && (
+                  <span className="text-xs text-muted block mt-0.5">{rev.location}</span>
+                )}
               </div>
             </div>
           ))}

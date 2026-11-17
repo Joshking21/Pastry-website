@@ -53,6 +53,6 @@ Shared style block appended to all product generation prompts:
 | `gallery-2.jpg` | 1200×1200 | PASS (37,552 colors) | A wire cooling rack of freshly baked, golden, fork-crimped Nigerian meat pies, a little steam rising, on a pale floured counter. |
 | `gallery-3.jpg` | 1200×1200 | PASS (37,573 colors) | Close-up of a piping bag piping a cream buttercream rose onto a blush-pink two-tier cake, other piped roses already done. |
 | `gallery-4.jpg` | 1200×1200 | PASS (36,071 colors) | Plain kraft bakery boxes (no printing) tied with jute twine, stacked and ready for delivery, one open showing meat pies and sausage rolls inside. |
-| `gallery-5.jpg` | 1200×1200 | Pending (quota reset 12:53 UTC) | A party tray seen from above, full of Nigerian small chops: puff-puff, samosas, spring rolls, peppered gizzard skewers, with small bowls of chilli sauce. |
-| `gallery-6.jpg` | 1200×1200 | Pending (quota reset 12:53 UTC) | An open kraft box of six assorted cupcakes with swirled buttercream in cream, pink and chocolate, sugar pearls, from about 45° above. |
-| `og-image.jpg` | 1200×630 | Pending (quota reset 12:53 UTC) | Wide shot of the pale floured marble counter: a cluster of golden meat pies, puff-puff and a sausage roll on the right third only; the left 55% is clean, empty counter (for text overlay). |
+| `gallery-5.jpg` | 1200×1200 | PASS (52,145 colors) | A party tray seen from above, full of Nigerian small chops: puff-puff, samosas, spring rolls, peppered gizzard skewers, with small bowls of chilli sauce. |
+| `gallery-6.jpg` | 1200×1200 | PASS (32,280 colors) | An open kraft box of six assorted cupcakes with swirled buttercream in cream, pink and chocolate, sugar pearls, from about 45° above. |
+| `og-image.jpg` | 1200×630 | PASS (24,453 colors) | Wide shot of the pale floured marble counter: a cluster of golden meat pies, puff-puff and a sausage roll on the right third only; the left 55% is clean, empty counter (for text overlay). |

@@ -1,9 +1,7 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useRef } from "react";
 import { useCart, formatNaira } from "@/context/CartContext";
 import { Check, ShoppingBag, Sparkles } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 interface PackSize {
   id: string;
@@ -38,6 +36,13 @@ export const PartyPackBuilder: React.FC = () => {
     "gizzard",
   ]);
 
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [-25, 25]);
+
   const toggleItem = (itemId: string) => {
     setSelectedItems((prev) => {
       if (prev.includes(itemId)) {
@@ -70,19 +75,25 @@ export const PartyPackBuilder: React.FC = () => {
       options: `Items included: ${selectedNames}`,
     });
 
-    import("canvas-confetti").then((mod) => {
-      const confetti = mod.default;
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { y: 0.7 },
-        colors: ["rgb(168, 50, 74)", "rgb(183, 121, 63)", "rgb(250, 246, 240)"],
-      });
-    }).catch(() => {});
+    import("canvas-confetti")
+      .then((mod) => {
+        const confetti = mod.default;
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          origin: { y: 0.7 },
+          colors: ["#A8324A", "#965C25", "#FAF6F0"],
+        });
+      })
+      .catch(() => {});
   };
 
   return (
-    <section id="party-packs" className="py-16 md:py-24 bg-surface/50 border-t border-border">
+    <section
+      id="party-packs"
+      ref={sectionRef}
+      className="py-16 md:py-24 bg-surface/50 border-t border-border"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Title */}
@@ -104,18 +115,37 @@ export const PartyPackBuilder: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Left Column: Image preview */}
+          {/* Left Column: Image preview with parallax and soft float (Job 4.2) */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            <div className="relative w-full max-w-[420px] aspect-square flex items-center justify-center">
-              <Image
-                src="/images/products/small-chops.png"
-                alt="Small Chops Party Pack spread"
-                width={800}
-                height={800}
-                sizes="(max-width: 768px) 300px, 420px"
-                className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.2)]"
-              />
-            </div>
+            <motion.div
+              style={{ y: parallaxY }}
+              className="relative w-full max-w-[420px] aspect-square flex items-center justify-center"
+            >
+              <motion.div
+                animate={{
+                  y: [-5, 5, -5],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="w-full h-full flex items-center justify-center"
+              >
+                <img
+                  src="/images/products/small-chops.png"
+                  alt="Small Chops Party Pack spread"
+                  width={800}
+                  height={800}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto object-contain drop-shadow-[0_20px_25px_rgba(59,36,24,0.18)] select-none"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/images/products/hero-meat-pie.png";
+                  }}
+                />
+              </motion.div>
+            </motion.div>
             <div className="mt-4 text-center">
               <span className="text-xs font-semibold uppercase tracking-wider text-heading">
                 {selectedSize.pieces} PIECE CELEBRATION TRAY
@@ -129,7 +159,7 @@ export const PartyPackBuilder: React.FC = () => {
           {/* Right Column: Interactive Selectors */}
           <div className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-lg">
             
-            {/* Step 1: Pack Size Selector */}
+            {/* Step 1: Pack Size Selector with spring scale and animated border */}
             <div className="mb-8">
               <label className="block text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
                 1. SELECT PACK SIZE
@@ -138,12 +168,15 @@ export const PartyPackBuilder: React.FC = () => {
                 {PACK_SIZES.map((pack) => {
                   const isSelected = selectedSize.id === pack.id;
                   return (
-                    <button
+                    <motion.button
                       key={pack.id}
+                      whileTap={{ scale: 0.96 }}
+                      animate={isSelected ? { scale: 1.02 } : { scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       onClick={() => setSelectedSize(pack)}
                       className={`relative p-3.5 sm:p-4 rounded-xl border text-center transition-all cursor-pointer min-h-[44px] ${
                         isSelected
-                          ? "border-accent bg-accent/5 shadow-xs"
+                          ? "border-accent bg-accent/10 ring-2 ring-accent/30 shadow-sm"
                           : "border-border bg-surface/40 hover:border-caramel"
                       }`}
                     >
@@ -158,7 +191,7 @@ export const PartyPackBuilder: React.FC = () => {
                       <span className="block text-xs font-medium text-muted mt-1">
                         From {formatNaira(pack.basePrice)}
                       </span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -218,13 +251,14 @@ export const PartyPackBuilder: React.FC = () => {
                 </span>
               </div>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={handleAddPack}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Add Pack to Order</span>
-              </button>
+              </motion.button>
             </div>
 
           </div>

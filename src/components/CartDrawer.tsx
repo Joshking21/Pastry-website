@@ -1,12 +1,8 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useCart, formatNaira } from "@/context/CartContext";
 import { siteConfig } from "@/data/site";
 import { X, Plus, Minus, Trash2, ShoppingBag, MessageCircle, Truck, Store, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -93,11 +89,14 @@ export const CartDrawer: React.FC = () => {
     }`;
 
     try {
-      confetti({
-        particleCount: 50,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["rgb(168, 50, 74)", "rgb(183, 121, 63)", "rgb(250, 246, 240)"],
+      import("canvas-confetti").then((mod) => {
+        const confetti = mod.default;
+        confetti({
+          particleCount: 50,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#A8324A", "#B7793F", "#FAF6F0"],
+        });
       });
     } catch {
       // ignore
@@ -114,7 +113,7 @@ export const CartDrawer: React.FC = () => {
     <AnimatePresence>
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Solid subtle backdrop without blur */}
+          {/* Solid subtle backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -124,7 +123,7 @@ export const CartDrawer: React.FC = () => {
           />
 
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            {/* Drawer panel: Bottom sheet style on mobile, side drawer on desktop */}
+            {/* Drawer panel */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -148,13 +147,14 @@ export const CartDrawer: React.FC = () => {
                   </div>
                 </div>
 
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
                   onClick={() => setIsCartOpen(false)}
                   className="size-11 rounded-full border border-heading/20 bg-bg hover:bg-surface text-heading flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Close cart drawer"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </motion.button>
               </div>
 
               {/* Items List (Scrollable) */}
@@ -170,12 +170,13 @@ export const CartDrawer: React.FC = () => {
                     <p className="text-sm text-muted max-w-xs mt-1.5 leading-relaxed">
                       Explore our flaky meat pies, party platters, and sweet treats to start your order.
                     </p>
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => setIsCartOpen(false)}
                       className="mt-6 px-6 min-h-[44px] rounded-full bg-heading text-white text-xs font-semibold tracking-wider uppercase hover:bg-accent transition-colors cursor-pointer flex items-center justify-center"
                     >
                       Browse Bakery Menu
-                    </button>
+                    </motion.button>
                   </div>
                 ) : (
                   <>
@@ -187,12 +188,15 @@ export const CartDrawer: React.FC = () => {
                         >
                           {/* Item cutout thumbnail */}
                           <div className="relative w-16 h-16 shrink-0 bg-surface/50 rounded-lg p-1 flex items-center justify-center">
-                            <Image
+                            <img
                               src={item.image}
                               alt={item.name}
-                              width={80}
-                              height={80}
-                              className="w-full h-full object-contain"
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = "/images/products/meat-pie.png";
+                              }}
+                              className="w-full h-full object-contain drop-shadow-[0_4px_8px_rgba(59,36,24,0.15)]"
                             />
                           </div>
 
@@ -206,39 +210,42 @@ export const CartDrawer: React.FC = () => {
                                 {item.options}
                               </p>
                             )}
-                            <div className="text-xs font-semibold text-caramel mt-1">
+                            <div className="text-xs font-semibold text-caramel mt-1 font-sans">
                               {formatNaira(item.price * item.quantity)}
                             </div>
                           </div>
 
                           {/* Quantity stepper + delete with 44px tap targets */}
                           <div className="flex flex-col items-end gap-1.5 shrink-0">
-                            <button
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
                               onClick={() => removeItem(item.id)}
-                              className="text-muted hover:text-accent transition-colors p-2 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                              className="text-muted hover:text-accent transition-colors p-2 min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer"
                               aria-label="Remove item"
                             >
                               <Trash2 className="w-4 h-4" />
-                            </button>
+                            </motion.button>
 
                             <div className="flex items-center gap-1.5 bg-surface rounded-full px-1.5 py-0.5 border border-border">
-                              <button
+                              <motion.button
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                 className="size-8 rounded-full bg-bg text-heading flex items-center justify-center text-xs cursor-pointer hover:bg-white"
                                 aria-label="Decrease item quantity"
                               >
                                 <Minus className="w-3.5 h-3.5" />
-                              </button>
+                              </motion.button>
                               <span className="font-heading text-sm px-1.5 text-heading min-w-[1.2rem] text-center">
                                 {item.quantity}
                               </span>
-                              <button
+                              <motion.button
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                 className="size-8 rounded-full bg-accent text-white flex items-center justify-center text-xs cursor-pointer hover:bg-accent-hover"
                                 aria-label="Increase item quantity"
                               >
                                 <Plus className="w-3.5 h-3.5" />
-                              </button>
+                              </motion.button>
                             </div>
                           </div>
                         </div>
@@ -258,7 +265,7 @@ export const CartDrawer: React.FC = () => {
                           onClick={() => setOrderType("delivery")}
                           className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
                             orderType === "delivery"
-                              ? "border-accent bg-accent/10 text-accent"
+                              ? "border-accent bg-accent/10 text-accent font-bold"
                               : "border-border bg-surface/40 text-muted"
                           }`}
                         >
@@ -271,7 +278,7 @@ export const CartDrawer: React.FC = () => {
                           onClick={() => setOrderType("pickup")}
                           className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer ${
                             orderType === "pickup"
-                              ? "border-accent bg-accent/10 text-accent"
+                              ? "border-accent bg-accent/10 text-accent font-bold"
                               : "border-border bg-surface/40 text-muted"
                           }`}
                         >
@@ -381,25 +388,24 @@ export const CartDrawer: React.FC = () => {
                 <div className="p-5 sm:p-6 border-t border-border bg-surface/70 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="font-heading text-lg text-heading">ESTIMATED TOTAL</span>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-base font-light text-heading">₦</span>
-                      <span className="text-3xl font-light text-heading">
-                        {totalPrice.toLocaleString("en-NG")}
-                      </span>
-                    </div>
+                    <span className="text-2xl sm:text-3xl font-bold text-heading font-sans">
+                      {formatNaira(totalPrice)}
+                    </span>
                   </div>
 
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
                     onClick={handleSendWhatsApp}
-                    className="w-full min-h-[48px] py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                    className="w-full min-h-[48px] py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer"
                   >
                     <MessageCircle className="w-5 h-5" />
                     <span>Send Order on WhatsApp</span>
-                  </button>
+                  </motion.button>
 
                   <div className="flex items-center justify-between text-[11px] text-muted pt-1">
                     <span>Payment verified via bank transfer</span>
                     <button
+                      type="button"
                       onClick={clearCart}
                       className="hover:text-accent transition-colors cursor-pointer min-h-[32px] flex items-center"
                     >
