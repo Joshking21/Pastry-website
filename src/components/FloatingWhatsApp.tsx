@@ -5,7 +5,13 @@ import { motion } from "framer-motion";
 
 export const FloatingWhatsApp: React.FC = () => {
   return (
-    <aside aria-label="WhatsApp quick chat" className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40">
+    <motion.aside
+      aria-label="WhatsApp quick chat"
+      initial={{ scale: 0, rotate: -45, opacity: 0 }}
+      animate={{ scale: 1, rotate: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 14, delay: 1.6 }}
+      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40"
+    >
       <motion.a
         whileTap={{ scale: 0.95 }}
         whileHover={{ scale: 1.03 }}
@@ -43,6 +49,6 @@ export const FloatingWhatsApp: React.FC = () => {
           </span>
         </div>
       </motion.a>
-    </aside>
+    </motion.aside>
   );
 };

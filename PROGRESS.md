@@ -23,7 +23,7 @@ The codebase contains:
 
 ### ✅ Job 1: Vite Port (100% Complete)
 - **Vite Configuration (`vite.config.ts`):** Configured with `@vitejs/plugin-react`, `@tailwindcss/vite`, path alias `@/` pointing to `src`, and clean ESM standard `fileURLToPath(new URL("./src", import.meta.url))`.
-- **HTML Entry Point (`index.html`):** Configured with Bebas Neue and Plus Jakarta Sans Google Fonts (`display=swap`), Schema.org `Bakery` JSON-LD, Open Graph tags, and module script mounting `<script type="module" src="/src/main.tsx">`.
+- **HTML Entry Point (`index.html`):** Configured with Plus Jakarta Sans from Google Fonts (`display=swap`); the heading font is Comic Sans MS with a self-hosted Comic Neue Bold fallback (`@fontsource/comic-neue`, set in `src/index.css`), Schema.org `Bakery` JSON-LD, Open Graph tags, and module script mounting `<script type="module" src="/src/main.tsx">`.
 - **Global Styles (`src/index.css`):** Built with pure Tailwind CSS v4 (`@import "tailwindcss";`), defining theme tokens (`--color-heading`, `--color-caramel`, `--color-accent`, etc.), floured background texture, `section[id] { scroll-margin-top: 96px; }`, and `@media (prefers-reduced-motion: reduce)`.
 - **React 19 Roots (`src/main.tsx` & `src/App.tsx`):** Renders clean client application mounted inside `<CartProvider>`.
 - **Component Porting:** All 12 components migrated from `next/image` to standard `<img>` tags (`loading="lazy"`, `decoding="async"`, `onError` fallbacks), all links converted to standard `<a>` tags.
@@ -123,3 +123,24 @@ The codebase contains:
 - **Image Network Failures (4xx/5xx):** **0**
 - **WhatsApp Order URL Capture:** Verified generating complete breakdown with Naira symbol, customer name, delivery address, and notes.
 - **WhatsApp Cake Request URL Capture:** Verified generating structured specs (date, occasion, flavours, design notes).
+
+---
+
+## Update: themes, animations and bug fixes (November 17, 2026)
+
+**Colour themes.** A theme picker in the header switches between Classic Caramel (default), Cocoa Night (dark), Strawberry Cream and Pistachio. Themes redefine the `--color-*` tokens in `src/index.css`. The choice is saved in `localStorage`, applied before first paint, and switched with a circular reveal (View Transitions API, with a cross-fade fallback). Components use an `on-accent` token for text on accent buttons, and image overlays use fixed dark scrims so every theme stays readable.
+
+**Animations.** Hero word-by-word spring headline, self-drawing underline, spinning pie entrance, mouse-follow tilt, morphing colour blobs, rotating "baked fresh daily" stamp; scroll-reveal on every section (`src/components/Reveal.tsx`); product images fly into the cart icon on add (`src/lib/flyToCart.ts`); header scroll-progress bar; button shine sweep; gallery lightbox slides; party-pack price pop; animated cart items. All motion respects `prefers-reduced-motion` (`MotionConfig reducedMotion="user"` plus the CSS override).
+
+**Bugs fixed.**
+- Heading font only looked handwritten when Bebas Neue failed to load (generic `cursive` fallback). Now set explicitly.
+- Mobile header rendered two logos and two cart buttons.
+- Menu carousel arrows stopped working after switching category.
+- Desktop product detail locked page scrolling; focus jumped to the close button after every "Add".
+- Mobile product sheet's "Add to Order" was covered by the floating WhatsApp button.
+- Custom cake form showed "4–8 guests / Classic Vanilla" but sent "10–20 guests / Vanilla Bean & Red Velvet"; no 3-day minimum on the date.
+- Gallery lightbox reset `body` overflow to `unset`, clobbering other scroll locks.
+- Mouse-drag on the carousel fought smooth scrolling and snapping.
+- Header shrink flickered near the threshold; "Menu" nav item was highlighted while still in the hero.
+- Missing favicon (`/favicon.ico` did not exist); party-pack chop list and gallery tiles were not keyboard accessible; FAQ removed focus outlines.
+- Sausage roll cut-out had a hard leftover background edge.

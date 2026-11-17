@@ -3,6 +3,7 @@ import { useCart, formatNaira } from "@/context/CartContext";
 import { siteConfig } from "@/data/site";
 import { X, Plus, Minus, Trash2, ShoppingBag, MessageCircle, Truck, Store, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { themeColors } from "@/context/ThemeContext";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -27,6 +28,7 @@ export const CartDrawer: React.FC = () => {
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const addressInputRef = useRef<HTMLInputElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
 
   // Close on Escape key and restore body overflow
   useEffect(() => {
@@ -34,11 +36,14 @@ export const CartDrawer: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsCartOpen(false);
     };
+    let focusTimer: number | undefined;
     if (isCartOpen) {
       window.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
+      focusTimer = window.setTimeout(() => closeBtnRef.current?.focus({ preventScroll: true }), 80);
     }
     return () => {
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = prevOverflow;
     };
@@ -88,19 +93,17 @@ export const CartDrawer: React.FC = () => {
       notes ? `Notes: ${notes}` : ""
     }`;
 
-    try {
-      import("canvas-confetti").then((mod) => {
-        const confetti = mod.default;
-        confetti({
-          particleCount: 50,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#A8324A", "#B7793F", "#FAF6F0"],
+    import("canvas-confetti")
+      .then((mod) => {
+        mod.default({
+          particleCount: 90,
+          spread: 80,
+          startVelocity: 38,
+          origin: { x: 0.85, y: 0.8 },
+          colors: themeColors(),
         });
-      });
-    } catch {
-      // ignore
-    }
+      })
+      .catch(() => {});
 
     const whatsappUrl = `https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
       message
@@ -112,14 +115,14 @@ export const CartDrawer: React.FC = () => {
   return (
     <AnimatePresence>
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true" aria-label="Your basket">
           {/* Solid subtle backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-heading/40 cursor-pointer"
+            className="fixed inset-0 bg-black/50 backdrop-blur-[2px] cursor-pointer"
           />
 
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
@@ -148,7 +151,9 @@ export const CartDrawer: React.FC = () => {
                 </div>
 
                 <motion.button
+                  ref={closeBtnRef}
                   whileTap={{ scale: 0.92 }}
+                  whileHover={{ rotate: 90 }}
                   onClick={() => setIsCartOpen(false)}
                   className="size-11 rounded-full border border-heading/20 bg-bg hover:bg-surface text-heading flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Close cart drawer"
@@ -173,7 +178,7 @@ export const CartDrawer: React.FC = () => {
                     <motion.button
                       whileTap={{ scale: 0.97 }}
                       onClick={() => setIsCartOpen(false)}
-                      className="mt-6 px-6 min-h-[44px] rounded-full bg-heading text-white text-xs font-semibold tracking-wider uppercase hover:bg-accent transition-colors cursor-pointer flex items-center justify-center"
+                      className="mt-6 px-6 min-h-[44px] rounded-full bg-heading text-on-accent text-xs font-semibold tracking-wider uppercase hover:bg-accent transition-colors cursor-pointer flex items-center justify-center"
                     >
                       Browse Bakery Menu
                     </motion.button>
@@ -181,9 +186,14 @@ export const CartDrawer: React.FC = () => {
                 ) : (
                   <>
                     <div className="space-y-3">
-                      {items.map((item) => (
-                        <div
+                      <AnimatePresence initial={false}>
+                      {items.map((item, i) => (
+                        <motion.div
                           key={item.id}
+                          layout
+                          initial={{ opacity: 0, x: 40 }}
+                          animate={{ opacity: 1, x: 0, transition: { delay: 0.04 * i } }}
+                          exit={{ opacity: 0, x: 60, height: 0, marginTop: 0, paddingTop: 0, paddingBottom: 0 }}
                           className="bg-bg rounded-xl p-3.5 border border-border shadow-xs flex items-center gap-3.5"
                         >
                           {/* Item cutout thumbnail */}
@@ -202,7 +212,7 @@ export const CartDrawer: React.FC = () => {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-heading text-base sm:text-lg text-heading truncate leading-tight">
+                            <h4 className="font-heading text-base sm:text-lg text-heading line-clamp-2 leading-tight">
                               {item.name}
                             </h4>
                             {item.options && (
@@ -230,7 +240,7 @@ export const CartDrawer: React.FC = () => {
                               <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="size-8 rounded-full bg-bg text-heading flex items-center justify-center text-xs cursor-pointer hover:bg-white"
+                                className="size-8 rounded-full bg-bg text-heading flex items-center justify-center text-xs cursor-pointer hover:bg-surface"
                                 aria-label="Decrease item quantity"
                               >
                                 <Minus className="w-3.5 h-3.5" />
@@ -241,15 +251,16 @@ export const CartDrawer: React.FC = () => {
                               <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="size-8 rounded-full bg-accent text-white flex items-center justify-center text-xs cursor-pointer hover:bg-accent-hover"
+                                className="size-8 rounded-full bg-accent text-on-accent flex items-center justify-center text-xs cursor-pointer hover:bg-accent-hover"
                                 aria-label="Increase item quantity"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                               </motion.button>
                             </div>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
+                      </AnimatePresence>
                     </div>
 
                     {/* Order Details Form */}
@@ -396,7 +407,7 @@ export const CartDrawer: React.FC = () => {
                   <motion.button
                     whileTap={{ scale: 0.97 }}
                     onClick={handleSendWhatsApp}
-                    className="w-full min-h-[48px] py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer"
+                    className="w-full min-h-[48px] py-3.5 rounded-full bg-accent hover:bg-accent-hover text-on-accent font-medium text-sm tracking-wide flex items-center justify-center gap-2.5 shadow-lg transition-all cursor-pointer btn-shine"
                   >
                     <MessageCircle className="w-5 h-5" />
                     <span>Send Order on WhatsApp</span>

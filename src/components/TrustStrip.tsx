@@ -1,7 +1,6 @@
 import React from "react";
 import { siteConfig } from "@/data/site";
 import { Flame, Clock, Truck, PartyPopper } from "lucide-react";
-import { motion } from "framer-motion";
 
 export const TrustStrip: React.FC = () => {
   const points = [
@@ -33,16 +32,8 @@ export const TrustStrip: React.FC = () => {
   return (
     <section className="border-y border-border bg-surface/50 py-6 sm:py-7 overflow-hidden relative">
       {/* Slow infinite marquee (Job 4.2) */}
-      <div className="flex select-none">
-        <motion.div
-          animate={{ x: ["0%", "-33.333%"] }}
-          transition={{
-            repeat: Infinity,
-            duration: 28,
-            ease: "linear",
-          }}
-          className="flex items-center gap-8 sm:gap-14 shrink-0 pr-8 sm:pr-14"
-        >
+      <div className="marquee-wrap flex select-none">
+        <div className="animate-marquee flex items-center gap-8 sm:gap-14 shrink-0 pr-8 sm:pr-14">
           {marqueeItems.map((pt, idx) => {
             const Icon = pt.icon;
             return (
@@ -50,7 +41,7 @@ export const TrustStrip: React.FC = () => {
                 key={idx}
                 className="flex items-center gap-3.5 shrink-0 group"
               >
-                <div className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105">
+                <div className="w-10 h-10 rounded-full bg-bg border border-border flex items-center justify-center shrink-0 shadow-xs transition-all duration-300 group-hover:scale-125 group-hover:rotate-12 group-hover:border-accent">
                   <Icon className="w-4 h-4 text-caramel" />
                 </div>
                 <div className="whitespace-nowrap">
@@ -65,7 +56,7 @@ export const TrustStrip: React.FC = () => {
               </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

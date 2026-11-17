@@ -1,6 +1,7 @@
 import React from "react";
 import { siteConfig } from "@/data/site";
 import { Heart } from "lucide-react";
+import { Reveal } from "@/components/Reveal";
 
 export const AboutSection: React.FC = () => {
   return (
@@ -9,7 +10,12 @@ export const AboutSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
           {/* Left Column: Portrait Image */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          <Reveal from="left" className="lg:col-span-5 relative flex justify-center">
+            {/* Tilted accent card peeking out behind the portrait */}
+            <div
+              aria-hidden="true"
+              className="absolute w-full max-w-[420px] aspect-[4/5] rounded-3xl bg-gradient-to-br from-accent/80 to-caramel/80 rotate-6 translate-x-3"
+            />
             <div className="relative w-full max-w-[420px] aspect-[4/5] rounded-3xl overflow-hidden border border-border shadow-xl bg-bg group">
               <img
                 src="/images/baker.jpg"
@@ -23,24 +29,24 @@ export const AboutSection: React.FC = () => {
                   (e.currentTarget as HTMLImageElement).src = "/images/products/hero-meat-pie.png";
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-heading/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
               
               <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
-                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-bg">
+                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-white/90">
                   FOUNDER &amp; HEAD BAKER
                 </span>
                 <p className="font-heading text-2xl sm:text-3xl tracking-wide">
                   {siteConfig.ownerName}
                 </p>
-                <p className="text-base text-bg/90 mt-1">
+                <p className="text-base text-white/85 mt-1">
                   Baking in {siteConfig.city}, {siteConfig.state}
                 </p>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right Column: Story */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+          <Reveal from="right" delay={0.1} className="lg:col-span-7 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 mb-2">
               <Heart className="w-4 h-4 text-accent" />
               <span className="text-xs uppercase tracking-[0.25em] font-bold text-accent">
@@ -70,7 +76,7 @@ export const AboutSection: React.FC = () => {
               </p>
             </div>
 
-          </div>
+          </Reveal>
 
         </div>
       </div>

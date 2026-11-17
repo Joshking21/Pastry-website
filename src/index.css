@@ -1,5 +1,12 @@
 @import "tailwindcss";
+/* Self-hosted Comic Neue Bold: the fallback for devices without Comic Sans (iOS, Android, Linux).
+   Only the 700 face is registered so it always renders with the same chunky weight. */
+@import "@fontsource/comic-neue/700.css";
 
+/* ------------------------------------------------------------------
+   Design tokens. Tailwind utilities (bg-bg, text-accent, ...) read
+   these variables, so each theme below only has to redefine them.
+   ------------------------------------------------------------------ */
 @theme {
   --color-bg: #FAF6F0;
   --color-surface: #F1EAE0;
@@ -9,52 +16,86 @@
   --color-muted: #5A4E46;
   --color-accent: #A8324A;
   --color-accent-hover: #8D253B;
+  --color-on-accent: #FFFFFF;
   --color-border: #E8DED1;
   --color-whatsapp: #25D366;
   --color-whatsapp-hover: #20BD5A;
-  --font-heading: "Bebas Neue", cursive, sans-serif;
+  /* The handwritten heading look: Comic Sans where installed (Windows, macOS),
+     bundled Comic Neue Bold everywhere else. */
+  --font-heading: "Comic Sans MS", "Comic Neue", "Chalkboard SE", cursive;
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
-:root {
-  --bg: #FAF6F0;
-  --surface: #F1EAE0;
-  --heading: #3B2418;
-  --caramel: #965C25;
-  --text: #2E2520;
-  --muted: #5A4E46;
-  --accent: #A8324A;
-  --accent-hover: #8D253B;
-  --border: #E8DED1;
-  --font-heading: "Bebas Neue", cursive, sans-serif;
-  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+/* Theme: Cocoa Night (dark) */
+:root[data-theme="cocoa"] {
+  color-scheme: dark;
+  --color-bg: #1C1310;
+  --color-surface: #2A1C16;
+  --color-heading: #F7E6D0;
+  --color-caramel: #E8A867;
+  --color-text: #EADCCB;
+  --color-muted: #C2B09E;
+  --color-accent: #F2789A;
+  --color-accent-hover: #F792AE;
+  --color-on-accent: #2A0E17;
+  --color-border: #3F2E26;
+}
+
+/* Theme: Strawberry Cream */
+:root[data-theme="strawberry"] {
+  --color-bg: #FFF5F6;
+  --color-surface: #FDE3E9;
+  --color-heading: #5B1730;
+  --color-caramel: #A93A62;
+  --color-text: #3B1E28;
+  --color-muted: #744A58;
+  --color-accent: #D11E58;
+  --color-accent-hover: #B0154A;
+  --color-on-accent: #FFFFFF;
+  --color-border: #F4CBD6;
+}
+
+/* Theme: Pistachio */
+:root[data-theme="pistachio"] {
+  --color-bg: #F5F8EE;
+  --color-surface: #E4ECD3;
+  --color-heading: #26361A;
+  --color-caramel: #557428;
+  --color-text: #253020;
+  --color-muted: #535E48;
+  --color-accent: #C04E28;
+  --color-accent-hover: #A2401F;
+  --color-on-accent: #FFFFFF;
+  --color-border: #D1DCBB;
 }
 
 html {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans);
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   min-height: 100vh;
   position: relative;
 }
 
-/* Fixed full-screen background texture without janky background-attachment: fixed */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image: url('/images/bg-texture.jpg');
-  background-size: cover;
-  background-position: center;
-  pointer-events: none;
-  opacity: 0.6;
+/* Colours glide between themes when the View Transitions API is unavailable */
+html.theme-fading,
+html.theme-fading *,
+html.theme-fading *::before,
+html.theme-fading *::after {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, fill 0.5s ease !important;
+}
+
+/* Circular theme reveal (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 .font-heading {
@@ -63,14 +104,76 @@ body::before {
   text-transform: uppercase;
 }
 
-/* Section scroll-margin to avoid header clipping (Job 2.1) */
+/* Section scroll-margin to avoid header clipping */
 section[id] {
   scroll-margin-top: 96px;
 }
 
+/* ------------------------------------------------------------------
+   Animation utilities
+   ------------------------------------------------------------------ */
+
+/* Infinite trust-strip marquee: pauses on hover */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+.marquee-wrap:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+/* Light sweep across primary buttons on hover */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Slow spin for the hero "fresh daily" stamp */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+/* Soft morphing colour blobs behind hero / contact art */
+@keyframes blob {
+  0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+  33% { border-radius: 63% 37% 41% 59% / 58% 36% 64% 42%; transform: translate(4%, -3%) scale(1.06); }
+  66% { border-radius: 37% 63% 52% 48% / 46% 61% 39% 54%; transform: translate(-3%, 4%) scale(0.96); }
+}
+.animate-blob {
+  animation: blob 14s ease-in-out infinite;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

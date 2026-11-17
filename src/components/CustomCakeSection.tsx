@@ -2,12 +2,27 @@ import React, { useState, useRef } from "react";
 import { siteConfig } from "@/data/site";
 import { Cake, MessageCircle, AlertCircle } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Reveal } from "@/components/Reveal";
+
+/** Earliest bookable date (today + 3 days) as yyyy-mm-dd in local time. */
+function minCakeDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 3);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function prettyDate(iso: string): string {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
 
 export const CustomCakeSection: React.FC = () => {
   const [occasion, setOccasion] = useState("Birthday");
   const [dateNeeded, setDateNeeded] = useState("");
-  const [guestCount, setGuestCount] = useState("10 - 20 guests");
-  const [flavour, setFlavour] = useState("Vanilla Bean & Red Velvet");
+  const [guestCount, setGuestCount] = useState("10 - 20 guests (Standard)");
+  const [flavour, setFlavour] = useState("Vanilla Bean & Buttercream");
   const [referenceLink, setReferenceLink] = useState("");
   const [designNotes, setDesignNotes] = useState("");
 
@@ -24,7 +39,7 @@ export const CustomCakeSection: React.FC = () => {
     const message = `${siteConfig.whatsappGreetings.customCake}
 
 • Occasion: ${occasion}
-• Date Needed: ${dateNeeded || "To be discussed"}
+• Date Needed: ${prettyDate(dateNeeded) || "To be discussed"}
 • Guest Count: ${guestCount}
 • Preferred Flavour: ${flavour}
 • Design Notes: ${designNotes || "None"}
@@ -48,7 +63,7 @@ Please let me know your availability and pricing!`;
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
           {/* Left Column: Visual & Story */}
-          <div className="lg:col-span-5 flex flex-col justify-center">
+          <Reveal from="left" className="lg:col-span-5 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 mb-2">
               <Cake className="w-4 h-4 text-caramel" />
               <span className="text-xs uppercase tracking-[0.25em] font-bold text-caramel">
@@ -104,10 +119,10 @@ Please let me know your availability and pricing!`;
                 />
               </motion.div>
             </motion.div>
-          </div>
+          </Reveal>
 
           {/* Right Column: Custom Request Form */}
-          <div className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-xl">
+          <Reveal from="right" delay={0.1} className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-xl">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 
@@ -140,6 +155,7 @@ Please let me know your availability and pricing!`;
                     id="cake-date"
                     type="date"
                     required
+                    min={minCakeDate()}
                     value={dateNeeded}
                     onChange={(e) => setDateNeeded(e.target.value)}
                     className="w-full px-4 py-3 min-h-[44px] rounded-xl border border-border bg-surface/40 text-sm text-text focus:border-accent focus:ring-1 focus:ring-accent focus:outline-hidden transition-colors"
@@ -220,13 +236,13 @@ Please let me know your availability and pricing!`;
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-on-accent font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer btn-shine"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Send Cake Request on WhatsApp</span>
               </motion.button>
             </form>
-          </div>
+          </Reveal>
 
         </div>
       </div>

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { siteConfig, customerReviews } from "@/data/site";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Menu as MenuIcon, X, Instagram, MessageCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export const Navbar: React.FC = () => {
   const { totalCount, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("menu");
+  const [activeSection, setActiveSection] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartBounced, setCartBounced] = useState(false);
 
@@ -20,10 +21,18 @@ export const Navbar: React.FC = () => {
     }
   }, [totalCount]);
 
-  // Track scroll position for header shrink
+  // Reading-progress bar along the bottom of the header
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, restDelta: 0.001 });
+
+  // Header shrink with hysteresis: collapsing the top bar changes the header
+  // height, so a single threshold made it flicker when parked near 80px.
   useEffect(() => {
     const onScroll = () => {
-      setIsScrolled(window.scrollY > 80);
+      const y = window.scrollY;
+      setIsScrolled((prev) => (prev ? y > 30 : y > 120));
+      // Nothing highlighted while still in the hero
+      if (y < 200) setActiveSection("");
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -93,7 +102,7 @@ export const Navbar: React.FC = () => {
         
         {/* Top bar on desktop: Socials, Full Logo + Tagline, Cart */}
         <div
-          className={`flex items-center justify-between transition-all duration-300 ${
+          className={`hidden md:flex items-center justify-between transition-all duration-300 ${
             isScrolled ? "h-0 opacity-0 overflow-hidden py-0 border-b-0" : "py-3 sm:py-3.5 border-b border-border/60"
           }`}
         >
@@ -134,13 +143,17 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Top Right: Cart Button */}
-          <div className="flex items-center justify-end gap-3 w-1/3">
+          <div className="flex items-center justify-end gap-1 sm:gap-3 w-1/3">
+            <div className="hidden md:block">
+              <ThemeSwitcher showLabel />
+            </div>
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative p-2 min-h-[44px] min-w-[44px] text-heading hover:text-accent transition-colors flex items-center justify-end gap-2 group cursor-pointer"
               aria-label={`Cart with ${totalCount} items`}
             >
               <motion.div
+                data-cart-target
                 animate={cartBounced ? { scale: [1, 1.35, 1], rotate: [0, -10, 10, 0] } : {}}
                 transition={{ duration: 0.4 }}
                 className="relative"
@@ -150,7 +163,7 @@ export const Navbar: React.FC = () => {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1.5 -right-2 bg-accent text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs"
+                    className="absolute -top-1.5 -right-2 bg-accent text-on-accent text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs"
                   >
                     {totalCount}
                   </motion.span>
@@ -200,15 +213,16 @@ export const Navbar: React.FC = () => {
 
           {/* Right side for compact mode on desktop: compact cart icon */}
           {isScrolled && (
-            <div className="hidden md:flex items-center justify-end">
+            <div className="hidden md:flex items-center justify-end gap-1">
+              <ThemeSwitcher />
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 min-h-[44px] min-w-[44px] text-heading hover:text-accent transition-colors flex items-center gap-2 group cursor-pointer"
                 aria-label={`Cart with ${totalCount} items`}
               >
-                <ShoppingBag className="w-5 h-5 text-heading group-hover:text-accent transition-colors" />
+                <ShoppingBag data-cart-target className="w-5 h-5 text-heading group-hover:text-accent transition-colors" />
                 {totalCount > 0 && (
-                  <span className="bg-accent text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
+                  <span className="bg-accent text-on-accent text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
                     {totalCount}
                   </span>
                 )}
@@ -217,15 +231,16 @@ export const Navbar: React.FC = () => {
           )}
 
           {/* Mobile Right: Cart & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeSwitcher />
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative p-2 min-h-[44px] min-w-[44px] text-heading hover:text-accent transition-colors flex items-center justify-center cursor-pointer"
               aria-label={`Cart with ${totalCount} items`}
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag data-cart-target className="w-5 h-5" />
               {totalCount > 0 && (
-                <span className="absolute top-1 right-1 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 bg-accent text-on-accent text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {totalCount}
                 </span>
               )}
@@ -280,6 +295,12 @@ export const Navbar: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <motion.div
+        aria-hidden="true"
+        style={{ scaleX: progress }}
+        className="absolute left-0 right-0 bottom-0 h-[3px] origin-left bg-gradient-to-r from-caramel via-accent to-caramel"
+      />
     </header>
   );
 };

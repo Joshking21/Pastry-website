@@ -4,13 +4,26 @@ import { useCart } from "@/context/CartContext";
 import { ProductDetail } from "@/components/ProductDetail";
 import { ChevronLeft, ChevronRight, Plus, Minus, ShoppingBag, Check } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { Reveal } from "@/components/Reveal";
+import { flyToCart } from "@/lib/flyToCart";
 
 export const MenuSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const { addItem, getItemQuantity, updateQuantity } = useCart();
+  // The carousel element is re-created on every category switch (keyed for the slide
+  // animation) and the exiting copy unmounts *after* the new one mounts. A plain object
+  // ref would be nulled by that late unmount, killing the arrows, so keep the latest
+  // non-null element only.
   const carouselRef = useRef<HTMLDivElement | null>(null);
+  const [carouselEl, setCarouselEl] = useState<HTMLDivElement | null>(null);
+  const setCarouselNode = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      carouselRef.current = node;
+      setCarouselEl(node);
+    }
+  }, []);
   const activeTriggerRef = useRef<HTMLElement | null>(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -35,7 +48,7 @@ export const MenuSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const el = carouselRef.current;
+    const el = carouselEl;
     if (!el) return;
     updateScrollButtons();
     el.addEventListener("scroll", updateScrollButtons, { passive: true });
@@ -44,7 +57,7 @@ export const MenuSection: React.FC = () => {
       el.removeEventListener("scroll", updateScrollButtons);
       window.removeEventListener("resize", updateScrollButtons);
     };
-  }, [updateScrollButtons, selectedCategory]);
+  }, [updateScrollButtons, carouselEl]);
 
   const scrollByCard = (direction: "left" | "right") => {
     if (carouselRef.current) {
@@ -66,20 +79,40 @@ export const MenuSection: React.FC = () => {
     scrollLeftRef.current = carouselRef.current.scrollLeft;
   };
 
+  const setDragStyles = (dragging: boolean) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    el.style.scrollBehavior = dragging ? "auto" : "";
+    el.style.scrollSnapType = dragging ? "none" : "";
+  };
+
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingRef.current || !carouselRef.current) return;
     e.preventDefault();
     const x = e.pageX - carouselRef.current.offsetLeft;
     const walk = (x - startXRef.current) * 1.4;
-    if (Math.abs(walk) > 4) {
+    if (Math.abs(walk) > 4 && !hasDraggedRef.current) {
       hasDraggedRef.current = true;
+      setDragStyles(true);
     }
     carouselRef.current.scrollLeft = scrollLeftRef.current - walk;
   };
 
   const onMouseUpOrLeave = () => {
+    if (isDraggingRef.current && hasDraggedRef.current) {
+      // Re-enable snapping so the track settles neatly on a card
+      const el = carouselRef.current;
+      setDragStyles(false);
+      if (el) {
+        const card = el.querySelector<HTMLElement>("[data-card]");
+        const step = card ? card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || "24") : 0;
+        if (step) el.scrollTo({ left: Math.round(el.scrollLeft / step) * step, behavior: "smooth" });
+      }
+    }
     isDraggingRef.current = false;
   };
+
+  const closeDetail = useCallback(() => setSelectedProduct(null), []);
 
   const handleCardClick = (item: MenuItem, element: HTMLElement) => {
     if (hasDraggedRef.current) {
@@ -90,7 +123,8 @@ export const MenuSection: React.FC = () => {
     setSelectedProduct(item);
   };
 
-  const handleAdd = (item: MenuItem) => {
+  const handleAdd = (item: MenuItem, sourceEl?: Element | null) => {
+    flyToCart(sourceEl, item.image);
     addItem({
       id: item.id,
       name: item.name,
@@ -109,7 +143,7 @@ export const MenuSection: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Header & Category Filter Tabs */}
-          <div className="flex flex-col items-center text-center mb-10 md:mb-14">
+          <Reveal className="flex flex-col items-center text-center mb-10 md:mb-14">
             <span className="text-xs font-bold uppercase tracking-[0.25em] text-caramel mb-2">
               FRESH FROM THE OVEN
             </span>
@@ -150,7 +184,7 @@ export const MenuSection: React.FC = () => {
                 );
               })}
             </div>
-          </div>
+          </Reveal>
 
           {/* If a product is selected on desktop/tablet, show detail view in place! */}
           <AnimatePresence mode="wait">
@@ -158,7 +192,7 @@ export const MenuSection: React.FC = () => {
               <ProductDetail
                 key={selectedProduct.id}
                 product={selectedProduct}
-                onClose={() => setSelectedProduct(null)}
+                onClose={closeDetail}
                 triggerElementRef={activeTriggerRef}
               />
             ) : (
@@ -204,7 +238,7 @@ export const MenuSection: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -40 }}
                     transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    ref={carouselRef}
+                    ref={setCarouselNode}
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUpOrLeave}
@@ -220,10 +254,10 @@ export const MenuSection: React.FC = () => {
                         <motion.div
                           key={item.id}
                           data-card
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: idx * 0.04 }}
-                          whileHover={{ y: -4 }}
+                          initial={{ opacity: 0, y: 40, rotate: idx % 2 ? 2 : -2 }}
+                          animate={{ opacity: 1, y: 0, rotate: 0 }}
+                          transition={{ type: "spring", stiffness: 220, damping: 22, delay: idx * 0.06 }}
+                          whileHover={{ y: -8 }}
                           className="snap-start shrink-0 w-[84vw] sm:w-[calc(50%-16px)] lg:w-[calc(33.333%-22px)] flex flex-col justify-between group transition-shadow p-2"
                         >
                           <div>
@@ -250,11 +284,16 @@ export const MenuSection: React.FC = () => {
                             {/* Product Cut-out image visibly overlapping bottom third of title */}
                             <div
                               onClick={(e) => handleCardClick(item, e.currentTarget)}
-                              className="relative -mt-6 sm:-mt-8 w-full aspect-square flex items-center justify-center cursor-pointer transition-transform duration-500 group-hover:scale-105 group-hover:rotate-1 z-20"
+                              className="relative -mt-6 sm:-mt-8 w-full aspect-square flex items-center justify-center cursor-pointer transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3 z-20"
                             >
+                              {/* Themed "plate" that blooms behind the pastry on hover */}
+                              <span
+                                aria-hidden="true"
+                                className="absolute inset-[14%] rounded-full bg-gradient-to-br from-surface to-caramel/25 border border-border scale-75 opacity-60 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500"
+                              />
                               <motion.div
                                 layoutId={`product-image-${item.id}`}
-                                className="w-full h-full flex items-center justify-center"
+                                className="relative w-full h-full flex items-center justify-center"
                               >
                                 <img
                                   src={item.image}
@@ -299,7 +338,7 @@ export const MenuSection: React.FC = () => {
                                 </span>
                                 <button
                                   onClick={() => updateQuantity(item.id, qty + 1)}
-                                  className="size-11 rounded-full bg-accent text-white hover:bg-accent-hover flex items-center justify-center transition-colors cursor-pointer"
+                                  className="size-11 rounded-full bg-accent text-on-accent hover:bg-accent-hover flex items-center justify-center transition-colors cursor-pointer"
                                   aria-label="Increase quantity"
                                 >
                                   <Plus className="w-4 h-4" />
@@ -308,8 +347,8 @@ export const MenuSection: React.FC = () => {
                             ) : (
                               <motion.button
                                 whileTap={{ scale: 0.97 }}
-                                onClick={() => handleAdd(item)}
-                                className={`inline-flex items-center justify-center gap-1.5 px-6 min-h-[44px] min-w-[76px] rounded-full text-white font-medium text-xs tracking-wider uppercase transition-all shadow-xs hover:shadow-md cursor-pointer ${
+                                onClick={(e) => handleAdd(item, e.currentTarget.closest("[data-card]")?.querySelector("img"))}
+                                className={`inline-flex items-center justify-center gap-1.5 px-6 min-h-[44px] min-w-[76px] rounded-full text-on-accent font-medium text-xs tracking-wider uppercase transition-all btn-shine shadow-xs hover:shadow-md cursor-pointer ${
                                   isAdded ? "bg-whatsapp" : "bg-accent hover:bg-accent-hover"
                                 }`}
                               >

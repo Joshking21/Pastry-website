@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { MenuItem } from "@/data/menu";
 import { useCart } from "@/context/CartContext";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
+import { flyToCart } from "@/lib/flyToCart";
 
 interface ProductDetailProps {
   product: MenuItem;
@@ -17,29 +19,44 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 }) => {
   const { addItem, getItemQuantity, updateQuantity } = useCart();
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mobileCloseBtnRef = useRef<HTMLButtonElement | null>(null);
+  const mobileSheetRef = useRef<HTMLDivElement | null>(null);
+  const desktopImgRef = useRef<HTMLDivElement | null>(null);
+  const mobileImgRef = useRef<HTMLDivElement | null>(null);
+
+  // Keep the latest onClose in a ref so the effect below runs once per open,
+  // not on every parent re-render (that used to steal focus after each "Add").
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   const currentQty = getItemQuantity(product.id);
 
-  // Focus trap, Escape key handling, and clean scroll lock restoring previous value
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+  const handleAdd = (imgWrap: HTMLDivElement | null) => {
+    flyToCart(imgWrap?.querySelector("img"), product.image);
+    addItem({ id: product.id, name: product.name, price: product.price, image: product.image });
+  };
 
-    // Move focus to close button on open
-    setTimeout(() => {
-      closeBtnRef.current?.focus();
+  // Escape to close everywhere. On mobile the detail is a full-screen sheet, so
+  // there we also lock page scroll and trap focus. On desktop it sits inline in
+  // the menu, so the page must stay scrollable.
+  useEffect(() => {
+    const isMobileSheet = window.matchMedia("(max-width: 767px)").matches;
+    const prevOverflow = document.body.style.overflow;
+    if (isMobileSheet) document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => {
+      (isMobileSheet ? mobileCloseBtnRef : closeBtnRef).current?.focus({ preventScroll: true });
     }, 50);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
-      if (e.key === "Tab" && containerRef.current) {
-        const focusables = containerRef.current.querySelectorAll<HTMLElement>(
+      if (isMobileSheet && e.key === "Tab" && mobileSheetRef.current) {
+        const focusables = mobileSheetRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         if (focusables.length === 0) return;
@@ -64,18 +81,18 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow;
-      // Return focus to triggering card
-      triggerElementRef?.current?.focus();
+      if (isMobileSheet) document.body.style.overflow = prevOverflow;
+      // Return focus to the triggering card if it is still in the page
+      const trigger = triggerElementRef?.current;
+      if (trigger && trigger.isConnected) trigger.focus({ preventScroll: true });
     };
-  }, [onClose, triggerElementRef]);
+  }, [triggerElementRef]);
 
   return (
     <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-labelledby={`product-title-${product.id}`}
       className="relative w-full z-30"
     >
@@ -97,6 +114,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
           <div className="col-span-6 flex flex-col items-center justify-center relative">
             {/* Main Product Image (Travelling via layoutId) */}
             <motion.div
+              ref={desktopImgRef}
               layoutId={`product-image-${product.id}`}
               className="relative w-full max-w-[420px] aspect-square flex items-center justify-center z-10"
               transition={{ type: "spring", damping: 26, stiffness: 280 }}
@@ -230,7 +248,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                   </span>
                   <button
                     onClick={() => updateQuantity(product.id, currentQty + 1)}
-                    className="size-11 rounded-full bg-accent text-white hover:bg-accent-hover flex items-center justify-center transition-colors cursor-pointer"
+                    className="size-11 rounded-full bg-accent text-on-accent hover:bg-accent-hover flex items-center justify-center transition-colors cursor-pointer"
                     aria-label="Increase quantity"
                   >
                     <Plus className="w-4 h-4" />
@@ -239,15 +257,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.97 }}
-                  onClick={() =>
-                    addItem({
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.image,
-                    })
-                  }
-                  className="inline-flex items-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
+                  onClick={() => handleAdd(desktopImgRef.current)}
+                  className="inline-flex items-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-on-accent font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer btn-shine"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Add to Order</span>
@@ -260,12 +271,18 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
         </div>
       </div>
 
-      {/* MOBILE FULL-SCREEN SHEET (<768px): Slides up from bottom, image top, details below, sticky bottom bar */}
+      {/* MOBILE FULL-SCREEN SHEET (<768px). Portalled to <body> so it sits above the
+          header and the floating WhatsApp button instead of inside the menu's stacking context. */}
+      {createPortal(
       <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        ref={mobileSheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`product-title-mobile-${product.id}`}
         className="md:hidden fixed inset-0 z-50 bg-bg overflow-y-auto flex flex-col justify-between"
       >
         <div>
@@ -275,6 +292,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               {product.category}
             </span>
             <button
+              ref={mobileCloseBtnRef}
               onClick={onClose}
               className="size-11 rounded-full border border-heading/30 bg-bg flex items-center justify-center text-heading cursor-pointer"
               aria-label="Close product details"
@@ -285,7 +303,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 
           {/* Mobile Image */}
           <div className="p-6 flex flex-col items-center justify-center">
-            <div className="relative w-full max-w-[280px] aspect-square flex items-center justify-center">
+            <div ref={mobileImgRef} className="relative w-full max-w-[280px] aspect-square flex items-center justify-center">
               <img
                 src={product.image}
                 alt={product.name}
@@ -373,7 +391,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
               </span>
               <button
                 onClick={() => updateQuantity(product.id, currentQty + 1)}
-                className="size-11 rounded-full bg-accent text-white flex items-center justify-center cursor-pointer"
+                className="size-11 rounded-full bg-accent text-on-accent flex items-center justify-center cursor-pointer"
                 aria-label="Increase quantity"
               >
                 <Plus className="w-4 h-4" />
@@ -382,22 +400,17 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
           ) : (
             <motion.button
               whileTap={{ scale: 0.97 }}
-              onClick={() =>
-                addItem({
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  image: product.image,
-                })
-              }
-              className="inline-flex items-center gap-2 px-7 min-h-[44px] rounded-full bg-accent text-white font-medium text-sm tracking-wide cursor-pointer shadow-md"
+              onClick={() => handleAdd(mobileImgRef.current)}
+              className="inline-flex items-center gap-2 px-7 min-h-[44px] rounded-full bg-accent text-on-accent font-medium text-sm tracking-wide cursor-pointer shadow-md"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Add to Order</span>
             </motion.button>
           )}
         </div>
-      </motion.div>
+      </motion.div>,
+      document.body
+      )}
     </div>
   );
 };

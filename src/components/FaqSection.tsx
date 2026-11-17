@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { siteConfig } from "@/data/site";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Reveal, RevealItem } from "@/components/Reveal";
 
 interface FaqItem {
   q: string;
@@ -38,7 +39,7 @@ export const FaqSection: React.FC = () => {
     <section id="faq" className="py-16 md:py-24 relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title */}
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-2">
             <HelpCircle className="w-4 h-4 text-caramel" />
             <span className="text-xs uppercase tracking-[0.25em] font-bold text-caramel">
@@ -51,21 +52,23 @@ export const FaqSection: React.FC = () => {
           <p className="mt-2 text-base text-muted">
             Everything you need to know about placing an order, advance notice, and delivery.
           </p>
-        </div>
+        </Reveal>
 
         {/* Accordion List */}
-        <div className="space-y-3.5">
+        <Reveal stagger={0.08} className="space-y-3.5">
           {faqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
+              <RevealItem key={idx}>
               <div
-                key={idx}
-                className="bg-bg rounded-2xl border border-border overflow-hidden shadow-xs transition-colors hover:border-caramel/50"
+                className={`bg-bg rounded-2xl border overflow-hidden transition-all duration-300 hover:border-caramel/60 ${
+                  isOpen ? "border-accent/50 shadow-lg" : "border-border shadow-xs"
+                }`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full px-6 py-5 min-h-[48px] text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden"
+                  className="w-full px-6 py-5 min-h-[48px] text-left flex items-center justify-between gap-4 cursor-pointer"
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-${idx}`}
                 >
@@ -74,7 +77,7 @@ export const FaqSection: React.FC = () => {
                   </span>
                   <div
                     className={`size-11 rounded-full border border-heading/20 flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                      isOpen ? "rotate-180 bg-accent text-white border-accent" : "text-heading"
+                      isOpen ? "rotate-180 bg-accent text-on-accent border-accent" : "text-heading"
                     }`}
                   >
                     <ChevronDown className="w-4 h-4" />
@@ -97,9 +100,10 @@ export const FaqSection: React.FC = () => {
                   )}
                 </AnimatePresence>
               </div>
+              </RevealItem>
             );
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

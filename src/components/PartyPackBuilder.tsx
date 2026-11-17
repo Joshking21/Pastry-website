@@ -1,7 +1,10 @@
 import React, { useState, useRef } from "react";
 import { useCart, formatNaira } from "@/context/CartContext";
 import { Check, ShoppingBag, Sparkles } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Reveal } from "@/components/Reveal";
+import { themeColors } from "@/context/ThemeContext";
+import { flyToCart } from "@/lib/flyToCart";
 
 interface PackSize {
   id: string;
@@ -37,6 +40,7 @@ export const PartyPackBuilder: React.FC = () => {
   ]);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const packImgRef = useRef<HTMLImageElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -62,6 +66,7 @@ export const PartyPackBuilder: React.FC = () => {
   const totalPrice = Math.round(selectedSize.basePrice + extraCost);
 
   const handleAddPack = () => {
+    flyToCart(packImgRef.current, "/images/products/small-chops.png");
     const selectedNames = selectedItems
       .map((id) => PACK_ITEMS.find((i) => i.id === id)?.name)
       .filter(Boolean)
@@ -82,7 +87,7 @@ export const PartyPackBuilder: React.FC = () => {
           particleCount: 40,
           spread: 60,
           origin: { y: 0.7 },
-          colors: ["#A8324A", "#965C25", "#FAF6F0"],
+          colors: themeColors(),
         });
       })
       .catch(() => {});
@@ -97,7 +102,7 @@ export const PartyPackBuilder: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Title */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <Reveal className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-caramel" />
             <span className="text-xs uppercase tracking-[0.25em] font-bold text-caramel">
@@ -111,7 +116,7 @@ export const PartyPackBuilder: React.FC = () => {
             Planning a celebration, office gathering, or event? Choose your pack size,
             select your favourite small chops, and add it right to your basket.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
@@ -133,6 +138,7 @@ export const PartyPackBuilder: React.FC = () => {
                 className="w-full h-full flex items-center justify-center"
               >
                 <img
+                  ref={packImgRef}
                   src="/images/products/small-chops.png"
                   alt="Small Chops Party Pack spread"
                   width={800}
@@ -157,13 +163,13 @@ export const PartyPackBuilder: React.FC = () => {
           </div>
 
           {/* Right Column: Interactive Selectors */}
-          <div className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-lg">
+          <Reveal from="right" className="lg:col-span-7 bg-bg rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 border border-border shadow-lg">
             
             {/* Step 1: Pack Size Selector with spring scale and animated border */}
             <div className="mb-8">
-              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
+              <p className="text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
                 1. SELECT PACK SIZE
-              </label>
+              </p>
               <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 {PACK_SIZES.map((pack) => {
                   const isSelected = selectedSize.id === pack.id;
@@ -181,7 +187,7 @@ export const PartyPackBuilder: React.FC = () => {
                       }`}
                     >
                       {pack.popular && (
-                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-caramel text-white text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent text-on-accent text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full shadow-xs">
                           POPULAR
                         </span>
                       )}
@@ -199,17 +205,21 @@ export const PartyPackBuilder: React.FC = () => {
 
             {/* Step 2: Items checklist */}
             <div className="mb-8">
-              <label className="block text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
+              <p className="text-xs uppercase tracking-[0.18em] font-bold text-heading mb-3">
                 2. CHOOSE YOUR CHOP SELECTION (TICK ALL YOU LIKE)
-              </label>
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {PACK_ITEMS.map((item) => {
                   const isChecked = selectedItems.includes(item.id);
                   return (
-                    <div
+                    <motion.button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isChecked}
+                      whileTap={{ scale: 0.97 }}
                       key={item.id}
                       onClick={() => toggleItem(item.id)}
-                      className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      className={`p-3 min-h-[44px] rounded-xl border flex items-center justify-between text-left cursor-pointer transition-all ${
                         isChecked
                           ? "border-caramel bg-bg shadow-xs"
                           : "border-border bg-surface/30 hover:border-border"
@@ -219,11 +229,22 @@ export const PartyPackBuilder: React.FC = () => {
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
                             isChecked
-                              ? "bg-accent border-accent text-white"
-                              : "border-heading/30 bg-white"
+                              ? "bg-accent border-accent text-on-accent"
+                              : "border-heading/30 bg-bg"
                           }`}
                         >
-                          {isChecked && <Check className="w-3.5 h-3.5" />}
+                          <AnimatePresence>
+                            {isChecked && (
+                              <motion.span
+                                initial={{ scale: 0, rotate: -90 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                exit={{ scale: 0 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </div>
                         <span className="text-xs sm:text-sm font-medium text-text">
                           {item.name}
@@ -234,7 +255,7 @@ export const PartyPackBuilder: React.FC = () => {
                           +{formatNaira(item.extra * (selectedSize.pieces / 50))}
                         </span>
                       )}
-                    </div>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -246,22 +267,28 @@ export const PartyPackBuilder: React.FC = () => {
                 <span className="text-xs uppercase tracking-wider text-muted block">
                   Estimated Total for {selectedSize.pieces} Pieces
                 </span>
-                <span className="font-heading text-3xl sm:text-4xl text-heading">
+                <motion.span
+                  key={totalPrice}
+                  initial={{ scale: 1.25, color: "var(--color-accent)" }}
+                  animate={{ scale: 1, color: "var(--color-heading)" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="block origin-left font-heading text-3xl sm:text-4xl text-heading"
+                >
                   {formatNaira(totalPrice)}
-                </span>
+                </motion.span>
               </div>
 
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleAddPack}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-white font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 min-h-[44px] rounded-full bg-accent hover:bg-accent-hover text-on-accent font-medium text-sm tracking-wide transition-all shadow-md active:scale-95 cursor-pointer btn-shine"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Add Pack to Order</span>
               </motion.button>
             </div>
 
-          </div>
+          </Reveal>
         </div>
 
       </div>
